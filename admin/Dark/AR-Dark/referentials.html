@@ -1,0 +1,2965 @@
+﻿<!DOCTYPE html>
+<html lang="ar" data-bs-theme="dark" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="RecLise - Admin Space - Plateforme de gestion des rÃ©clamations et support pour ELISSA, systÃ¨me de correspondance Ã©lectronique officiel de la Tunisie.">
+  <title>RecLise â€” Admin Space</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz@0,14..32;1,14..32&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-dark: #0A0F1C;
+      --primary-light: #F5F8FA;
+      --brand-accent: #ffffff;
+      --neon-accent: #ffffff;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #ffffff;
+      --icon-color: #E2E0FF;
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text-primary: #E8ECF1;
+      --text-secondary: #94A3B8;
+      --sidebar-width: 270px;
+      --topbar-height: 60px;
+      --body-bg: #0A0F1C;
+      --card-bg: rgba(255, 255, 255, 0.07);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --input-bg: rgba(255, 255, 255, 0.08);
+      --input-border: rgba(255, 255, 255, 0.15);
+      --input-text: #E8ECF1;
+      --modal-bg: rgba(15, 20, 40, 0.95);
+      --mesh-color1: rgba(2, 92, 132, 0.15);
+      --mesh-color2: rgba(var(--brand-accent-rgb), 0.08);
+      --mesh-color3: rgba(59, 130, 246, 0.1);
+      --shadow-glow: 0 0 15px rgba(255, 255, 255, 0.1);
+      --table-hover: rgba(255, 255, 255, 0.05);
+      --toast-bg: rgba(15, 20, 40, 0.92);
+      --focus-glow: rgba(255, 255, 255, 0.25);
+      --focus-border: #ffffff;
+      --brand-accent-rgb: 255, 255, 255;
+      --btn-bg: #ffffff;
+      --btn-text: #0A0F1C;
+      --btn-border: #ffffff;
+      --btn-hover-bg: transparent;
+      --btn-hover-text: #025C84;
+    }
+
+    [data-bs-theme="light"] {
+      --brand-accent: #025C84;
+      --neon-accent: #025C84;
+      --brand-accent-rgb: 2, 92, 132;
+      --info: #025C84;
+      --icon-color: #025C84;
+      --body-bg: #E2E0FF;
+      --glass-bg: rgba(226, 224, 255, 0.6);
+      --glass-border: rgba(2, 92, 132, 0.08);
+      --text-primary: #1E293B;
+      --text-secondary: #64748B;
+      --card-bg: rgba(226, 224, 255, 0.6);
+      --card-border: rgba(2, 92, 132, 0.08);
+      --input-bg: rgba(226, 224, 255, 0.8);
+      --input-border: rgba(2, 92, 132, 0.15);
+      --input-text: #1E293B;
+      --modal-bg: rgba(226, 224, 255, 0.95);
+      --mesh-color1: rgba(2, 92, 132, 0.08);
+      --mesh-color2: rgba(var(--brand-accent-rgb), 0.05);
+      --mesh-color3: rgba(59, 130, 246, 0.06);
+      --shadow-glow: 0 0 15px rgba(2, 92, 132, 0.15);
+      --table-hover: rgba(2, 92, 132, 0.03);
+      --toast-bg: rgba(226, 224, 255, 0.92);
+      --focus-glow: rgba(2, 92, 132, 0.2);
+      --focus-border: #025C84;
+      --btn-bg: #025C84;
+      --btn-text: #ffffff;
+      --btn-border: #025C84;
+      --btn-hover-bg: transparent;
+      --btn-hover-text: #025C84;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      background: var(--body-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    body.rtl {
+      direction: rtl;
+      text-align: right;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body.rtl .sidebar {
+      left: auto;
+      right: 0;
+      border-right: none;
+      border-left: 1px solid var(--glass-border);
+    }
+
+    body.rtl .main-content {
+      margin-left: 0;
+      margin-right: var(--sidebar-width);
+    }
+
+    body.rtl .topbar {
+      left: 0;
+      right: var(--sidebar-width);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    a {
+      color: var(--neon-accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--brand-accent);
+      opacity: 0.8;
+    }
+
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(var(--brand-accent-rgb), 0.2);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .form-control,
+    .form-select {
+      background: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: var(--input-text) !important;
+      border-radius: 12px !important;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--focus-border) !important;
+      box-shadow: 0 0 0 3px var(--focus-glow) !important;
+      outline: none;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .form-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    .form-select option {
+      background: #1a1f35;
+      color: #E8ECF1;
+    }
+
+    [data-bs-theme="light"] .form-select option {
+      background: #fff;
+      color: #1E293B;
+    }
+
+    .btn-neon {
+      background: var(--btn-bg);
+      color: var(--btn-text) !important;
+      border: 1px solid var(--btn-border);
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .btn-neon:hover {
+      background: var(--btn-hover-bg);
+      box-shadow: 0 0 20px rgba(var(--brand-accent-rgb), 0.3);
+      transform: translateY(-1px);
+      color: var(--btn-hover-text) !important;
+    }
+
+    .btn-outline-neon {
+      background: transparent;
+      border: 1px solid var(--neon-accent);
+      color: var(--neon-accent);
+      border-radius: 10px;
+      padding: 8px 20px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .btn-outline-neon:hover {
+      background: var(--focus-glow);
+      box-shadow: var(--shadow-glow);
+      color: var(--neon-accent);
+    }
+
+    .btn-sm {
+      padding: 6px 14px !important;
+      font-size: 0.82rem !important;
+      border-radius: 8px !important;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--card-bg);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--glass-border);
+      z-index: 1040;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 22px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .sidebar-header .sidebar-logo {
+      height: 32px;
+      width: auto;
+      max-width: 120px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    #sidebarLogo {
+      display: block !important;
+    }
+
+    #sidebarLogoDark {
+      display: none !important;
+    }
+
+    [data-bs-theme="dark"] #sidebarLogo {
+      display: none !important;
+    }
+
+    [data-bs-theme="dark"] #sidebarLogoDark {
+      display: block !important;
+    }
+
+    .sidebar-header h5 {
+      font-size: 1.1rem;
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .sidebar-header small {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+
+    .sidebar .nav {
+      padding: 16px 12px;
+      flex: 1;
+    }
+
+    .sidebar .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.25s;
+      cursor: pointer;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+
+    .sidebar .nav-link i {
+      width: 20px;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .sidebar .nav-link:hover {
+      background: var(--focus-glow);
+      color: var(--neon-accent);
+    }
+
+    .sidebar .nav-link.active {
+      background: var(--focus-glow);
+      color: var(--neon-accent);
+      box-shadow: inset 3px 0 0 var(--neon-accent);
+    }
+
+    body.rtl .sidebar .nav-link.active {
+      box-shadow: inset -3px 0 0 var(--neon-accent);
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .sidebar-footer .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .sidebar-footer .btn-logout {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-footer .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: var(--topbar-height);
+      background: var(--card-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+      z-index: 1030;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      justify-content: space-between;
+    }
+
+    .topbar-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .topbar-actions .btn-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .topbar-actions .btn-icon:hover {
+      color: var(--neon-accent);
+      border-color: rgba(var(--brand-accent-rgb), 0.3);
+    }
+
+    .btn-hamburger {
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 15px;
+      z-index: 1050;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--card-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding-top: calc(var(--topbar-height) + 24px);
+      padding-left: 28px;
+      padding-right: 28px;
+      padding-bottom: 40px;
+      min-height: 100vh;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status-new { background: #F59E0B; color: #000; }
+    .status-in_progress, .status-in-progress { background: #3B82F6; color: #fff; }
+    .status-resolved { background: #10B981; color: #fff; }
+    .status-escalated { background: #EF4444; color: #fff; }
+    .status-closed { background: #6B7280; color: #fff; }
+
+    .priority-low { color: var(--success); }
+    .priority-medium { color: var(--warning); }
+    .priority-high { color: var(--danger); font-weight: 700; }
+
+    .stat-card {
+      background: var(--card-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(var(--brand-accent-rgb), 0.2);
+      box-shadow: var(--shadow-glow);
+      transform: translateY(-2px);
+    }
+
+    .stat-card .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+    }
+
+    .stat-card .stat-value {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: 1.8rem;
+    }
+
+    .stat-card .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-top: 2px;
+    }
+
+    .table-glass {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table-glass thead th {
+      background: rgba(var(--brand-accent-rgb), 0.06);
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--glass-border);
+      white-space: nowrap;
+    }
+
+    .table-glass tbody td {
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--glass-border);
+      vertical-align: middle;
+    }
+
+    .table-glass tbody tr:hover {
+      background: var(--table-hover);
+    }
+
+    .table-glass tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      z-index: 1060;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-box {
+      background: var(--modal-bg);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      animation: slideUp 0.3s ease;
+    }
+
+    .modal-box.modal-lg { max-width: 800px; }
+
+    .modal-box h3 {
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    body.rtl .modal-close {
+      right: auto;
+      left: 16px;
+    }
+
+    .modal-close:hover {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1090;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    body.rtl .toast-container {
+      right: auto;
+      left: 24px;
+    }
+
+    .toast-msg {
+      background: var(--toast-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideUp 0.3s ease;
+      min-width: 280px;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast-msg.success { border-left: 3px solid var(--success); }
+    .toast-msg.error { border-left: 3px solid var(--danger); }
+    .toast-msg.info { border-left: 3px solid var(--info); }
+    .toast-msg.warning { border-left: 3px solid var(--warning); }
+
+    body.rtl .toast-msg { border-left: none; }
+    body.rtl .toast-msg.success { border-right: 3px solid var(--success); }
+    body.rtl .toast-msg.error { border-right: 3px solid var(--danger); }
+    body.rtl .toast-msg.info { border-right: 3px solid var(--info); }
+    body.rtl .toast-msg.warning { border-right: 3px solid var(--warning); }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-header h2 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(var(--brand-accent-rgb), 0.1);
+      border: 1px solid rgba(var(--brand-accent-rgb), 0.2);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      margin: 4px;
+    }
+
+    .chip .chip-remove {
+      cursor: pointer;
+      color: var(--danger);
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .chip .chip-remove:hover {
+      color: #ff6b6b;
+    }
+
+    .progress-custom {
+      background: var(--input-bg);
+      border-radius: 10px;
+      height: 10px;
+      overflow: hidden;
+    }
+
+    .progress-custom .bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    .activity-text { font-size: 0.88rem; }
+
+    .activity-time {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1035;
+      display: none;
+    }
+
+    .sidebar-overlay.show { display: block; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-state p { font-size: 0.95rem; }
+
+    .lang-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .lang-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      min-width: 120px;
+      background: var(--modal-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 6px;
+      z-index: 9999;
+      display: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    body.rtl .lang-dropdown-menu {
+      right: auto;
+      left: 0;
+    }
+
+    .lang-dropdown-menu.show { display: block; }
+
+    .lang-dropdown-menu .lang-item {
+      display: block;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      transition: background 0.2s;
+    }
+
+    .lang-dropdown-menu .lang-item:hover {
+      background: rgba(var(--brand-accent-rgb), 0.1);
+    }
+
+    .lang-dropdown-menu .lang-item.active {
+      color: var(--neon-accent);
+      font-weight: 600;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 12px;
+      transition: all 0.3s;
+    }
+
+    .item-card:hover {
+      border-color: rgba(var(--brand-accent-rgb), 0.2);
+      box-shadow: var(--shadow-glow);
+    }
+
+      i[class*="fa-"] { color: var(--icon-color); }
+      .btn-neon i, .btn i { color: inherit !important; }
+
+      .sidebar-footer .btn-logout i {
+        color: var(--danger) !important;
+      }
+
+      .bar-chart {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        height: 200px;
+        padding: 20px 0;
+      }
+
+      .bar-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        height: 100%;
+        justify-content: flex-end;
+      }
+
+      .bar-value {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+      }
+
+      .bar {
+        width: 40px;
+        border-radius: 6px 6px 0 0;
+        transition: height 0.5s ease;
+      }
+
+      .bar-label {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin-top: 8px;
+        text-align: center;
+      }
+
+      @media (max-width: 991px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      body.rtl .sidebar {
+        transform: translateX(100%);
+      }
+
+      .sidebar.show {
+        transform: translateX(0) !important;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+
+      .topbar {
+        left: 0 !important;
+        right: 0 !important;
+        padding-left: 60px;
+      }
+
+      .btn-hamburger {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 575px) {
+      .main-content {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .stat-card .stat-value {
+        font-size: 1.4rem;
+      }
+
+      .modal-box {
+        padding: 24px 18px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(var(--brand-accent-rgb), 0.2);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(var(--brand-accent-rgb), 0.4);
+    }
+
+    /* Utility classes for inline styles */
+    .btn-warning {
+      background: var(--warning);
+      color: #fff;
+      border: 1px solid var(--warning);
+      border-radius: 8px;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+    }
+
+    .text-secondary {
+      color: var(--text-secondary);
+    }
+
+    .overflow-auto {
+      overflow-x: auto;
+    }
+
+    .flex-gap-4 {
+      display: flex;
+      gap: 4px;
+    }
+
+    .flex-gap-8 {
+      display: flex;
+      gap: 8px;
+    }
+
+    .flex-space-between {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .margin-bottom-16 {
+      margin-bottom: 16px;
+    }
+
+    .margin-top-6 {
+      margin-top: 6px;
+    }
+
+    .padding-30 {
+      padding: 30px;
+    }
+
+    .font-size-0-82 {
+      font-size: 0.82rem;
+    }
+
+    .font-style-italic {
+      font-style: italic;
+    }
+
+    .display-block {
+      display: block;
+    }
+
+    .margin-left-4 {
+      margin-left: 4px;
+    }
+
+    .flex-wrap {
+      flex-wrap: wrap;
+    }
+
+    .align-items-center {
+      align-items: center;
+    }
+
+    .margin-0 {
+      margin: 0;
+    }
+
+    .margin-bottom-12 {
+      margin-bottom: 12px;
+    }
+
+    .margin-bottom-20 {
+      margin-bottom: 20px;
+    }
+
+    .margin-bottom-4 {
+      margin-bottom: 4px;
+    }
+
+    .margin-top-20 {
+      margin-top: 20px;
+    }
+
+    .font-size-0-88 {
+      font-size: 0.88rem;
+    }
+
+    .margin-bottom-14 {
+      margin-bottom: 14px;
+    }
+
+    .activity-dot {
+      background: var(--neon-accent);
+    }
+
+    .status-accent {
+      background: var(--brand-accent);
+      color: var(--body-bg);
+    }
+
+    .status-action {
+      background: var(--brand-accent);
+      color: var(--body-bg);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="particleCanvas"></canvas>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div id="appShell">
+    <button class="btn-hamburger" id="btnHamburger" onclick="RecLise.toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="RecLise.toggleSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div>
+          <img src="C:/Users/wassi/OneDrive/Desktop/logo/Untitled-1rrrr.png" alt="Logo" class="sidebar-logo"
+            id="sidebarLogo" />
+          <img src="C:/Users/wassi/OneDrive/Desktop/logo/Untitled-1rg.png" alt="Logo" class="sidebar-logo"
+            id="sidebarLogoDark" />
+          <small id="sidebarRoleLabel">Admin</small>
+          
+        </div>
+      </div>
+      <ul class="nav flex-column" id="sidebarNav">
+      </ul>
+      <div class="sidebar-footer" id="sidebarFooter">
+      </div>
+    </nav>
+
+    <div class="topbar" id="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="lang-dropdown">
+          <button class="btn-icon" onclick="RecLise.toggleLangMenu()" title="Language">
+            <i class="fas fa-globe"></i>
+          </button>
+          <div class="lang-dropdown-menu" id="langMenu">
+            <div class="lang-item" data-lang="fr" onclick="RecLise.setLanguage('fr')">FranÃ§ais</div>
+            <div class="lang-item" data-lang="en" onclick="RecLise.setLanguage('en')">English</div>
+            <div class="lang-item" data-lang="ar" onclick="RecLise.setLanguage('ar')">Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©</div>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="RecLise.toggleTheme()" title="Toggle theme" id="btnThemeToggle">
+          <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <main class="main-content" id="mainContent">
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const RecLise = (function () {
+      'use strict';
+
+      const i18n = {
+        fr: {
+          appName: 'RecLise',
+          appSubtitle: 'ELISSA Support Platform â€” MESRS',
+          login: 'Connexion',
+          username: "Nom d'utilisateur",
+          password: 'Mot de passe',
+          role: 'RÃ´le',
+          authenticate: 'Authentifier',
+          roleUser: 'Utilisateur Final',
+          roleSupport: 'Ã‰quipe de Support',
+          roleAdmin: 'Administrateur',
+          dashboard: 'Tableau de bord',
+          userManagement: 'Gestion des utilisateurs',
+          escalatedRequests: 'Demandes escaladÃ©es',
+          correspondences: 'Correspondances',
+          referentials: 'RÃ©fÃ©rentiels',
+          distributionBoxes: 'Casiers de distribution',
+          technicalProblems: 'ProblÃ¨mes techniques',
+          statistics: 'Statistiques',
+          auditLogs: "Journaux d'audit",
+          systemSettings: 'ParamÃ¨tres systÃ¨me',
+          logout: 'DÃ©connexion',
+          totalRequests: 'Total demandes',
+          newRequests: 'Nouvelles',
+          inProgress: 'En cours',
+          resolved: 'RÃ©solues',
+          escalated: 'EscaladÃ©es',
+          recentActivity: 'ActivitÃ© rÃ©cente',
+          totalUsers: 'Total utilisateurs',
+          resolutionRate: 'Taux de rÃ©solution',
+          slaCompliance: 'ConformitÃ© SLA',
+          type: 'Type',
+          subject: 'Sujet',
+          description: 'Description',
+          category: 'CatÃ©gorie',
+          priority: 'PrioritÃ©',
+          attachments: 'PiÃ¨ces jointes',
+          submit: 'Soumettre',
+          cancel: 'Annuler',
+          save: 'Enregistrer',
+          delete: 'Supprimer',
+          edit: 'Modifier',
+          view: 'Voir',
+          close: 'Fermer',
+          process: 'Traiter',
+          reply: 'RÃ©pondre',
+          escalate: 'Escalader',
+          resolve: 'RÃ©soudre',
+          request: 'Demande',
+          complaint: 'RÃ©clamation',
+          technical: 'Technique',
+          access: 'AccÃ¨s',
+          trainingCat: 'Formation',
+          low: 'Basse',
+          medium: 'Moyenne',
+          high: 'Haute',
+          statusNew: 'Nouveau',
+          statusInProgress: 'En cours',
+          statusResolved: 'RÃ©solu',
+          statusEscalated: 'EscaladÃ©',
+          statusClosed: 'FermÃ©',
+          filterByStatus: 'Filtrer par statut',
+          allStatuses: 'Tous les statuts',
+          id: 'ID',
+          title: 'Titre',
+          status: 'Statut',
+          date: 'Date',
+          actions: 'Actions',
+          noResults: 'Aucun rÃ©sultat trouvÃ©.',
+          requestDetails: 'DÃ©tails de la demande',
+          messageThread: 'Fil de messages',
+          yourReply: 'Votre rÃ©ponse',
+          replyAndUpdate: 'RÃ©pondre & Mettre Ã  jour',
+          escalateToAdmin: "Escalader Ã  l'admin",
+          updateStatus: 'Mettre Ã  jour le statut',
+          addUser: 'Ajouter un utilisateur',
+          editUser: 'Modifier utilisateur',
+          fullName: 'Nom complet',
+          email: 'Email',
+          department: 'DÃ©partement',
+          phone: 'TÃ©lÃ©phone',
+          userStatus: 'Statut',
+          active: 'Actif',
+          inactive: 'Inactif',
+          confirmDelete: 'Confirmer la suppression',
+          confirmDeleteMsg: 'ÃŠtes-vous sÃ»r de vouloir supprimer cet Ã©lÃ©ment ?',
+          yes: 'Oui',
+          no: 'Non',
+          delegateRole: 'DÃ©lÃ©guer le rÃ´le',
+          closureMotive: 'Motif de clÃ´ture',
+          finalResponse: 'RÃ©ponse finale',
+          addTemplate: 'Ajouter un modÃ¨le',
+          templateName: 'Nom du modÃ¨le',
+          templateType: 'Type de modÃ¨le',
+          subTasks: 'Sous-tÃ¢ches',
+          closureMotives: 'Motifs de clÃ´ture',
+          addItem: 'Ajouter',
+          boxName: 'Nom du casier',
+          members: 'Membres',
+          issueDescription: 'Description du problÃ¨me',
+          addIssue: 'Ajouter un problÃ¨me',
+          requestsByType: 'Demandes par type',
+          requestsByCategory: 'Demandes par catÃ©gorie',
+          requestsByDept: 'Demandes par dÃ©partement',
+          action: 'Action',
+          details: 'DÃ©tails',
+          timestamp: 'Horodatage',
+          userId: 'ID utilisateur',
+          emailNotifications: 'Notifications par email',
+          sessionTimeout: 'DÃ©lai de session',
+          enabled: 'ActivÃ©',
+          disabled: 'DÃ©sactivÃ©',
+          minutes: 'minutes',
+          settingsSaved: 'ParamÃ¨tres enregistrÃ©s',
+          welcomeBack: 'Bienvenue,',
+          quickActions: 'Actions rapides',
+          viewAll: 'Voir tout',
+          from: 'De',
+          requestCreated: 'Demande crÃ©Ã©e avec succÃ¨s',
+          statusUpdated: 'Statut mis Ã  jour',
+          userAdded: 'Utilisateur ajoutÃ©',
+          userUpdated: 'Utilisateur mis Ã  jour',
+          userDeleted: 'Utilisateur supprimÃ©',
+          requestEscalated: 'Demande escaladÃ©e',
+          requestResolved: 'Demande rÃ©solue',
+          settingsNote: 'Ces paramÃ¨tres sont simulÃ©s pour la dÃ©monstration.',
+          noMessages: 'Aucun message pour le moment.',
+          assignedTo: 'AssignÃ© Ã ',
+          createdAt: 'CrÃ©Ã© le',
+          typeRequest: 'Demande',
+          typeComplaint: 'RÃ©clamation',
+          hours: 'heures',
+          all: 'Tous',
+          adminSpace: 'Espace Admin',
+          search: 'Rechercher...',
+           searchFilter: 'Rechercher / Filtrer',
+           fillRequiredFields: 'Veuillez remplir les champs obligatoires',
+           pleaseSelectRequest: 'Veuillez sÃ©lectionner une demande',
+           pleaseTypeMessage: 'Veuillez saisir un message',
+           messageSent: 'Message envoyÃ© avec succÃ¨s',
+           replySent: 'RÃ©ponse envoyÃ©e',
+           cannotDeleteSelf: 'Impossible de supprimer l\'utilisateur actuel',
+           viewNotFound: 'Vue introuvable.',
+           internal: 'Interne',
+           external: 'Externe',
+            system: 'SystÃ¨me',
+            commonCustomization: 'Personnalisation commune',
+            dashboardWidgets: 'Widgets du tableau de bord',
+            workflow: 'Flux de travail',
+            widgetRequests: 'Demandes',
+            widgetUsers: 'Utilisateurs',
+            widgetStats: 'Statistiques',
+            widgetActivity: 'ActivitÃ© rÃ©cente',
+            customizeWorkflow: 'Processus de circulation',
+            newPassword: 'Nouveau mot de passe',
+            leaveBlankToKeep: 'Laisser vide pour conserver',
+            resetPassword: 'RÃ©initialiser le mot de passe',
+            confirmNewPassword: 'Confirmer le nouveau mot de passe',
+            passwordsMismatch: 'Les mots de passe ne correspondent pas',
+            reassignTo: 'RÃ©assigner Ã ',
+            saveReassignment: 'Sauvegarder',
+            fileModelTemplate: 'ModÃ¨le de fichier',
+            saveTemplate: 'Sauvegarder modÃ¨le'
+          },
+         en: {
+          appName: 'RecLise',
+          appSubtitle: 'ELISSA Support Platform â€” MESRS',
+          login: 'Login',
+          username: 'Username',
+          password: 'Password',
+          role: 'Role',
+          authenticate: 'Authenticate',
+          roleUser: 'Final User',
+          roleSupport: 'Support Team',
+          roleAdmin: 'Administrator',
+          dashboard: 'Dashboard',
+          userManagement: 'User Management',
+          escalatedRequests: 'Escalated Requests',
+          correspondences: 'Correspondences',
+          referentials: 'Referentials',
+          distributionBoxes: 'Distribution Boxes',
+          technicalProblems: 'Technical Problems',
+          statistics: 'Statistics',
+          auditLogs: 'Audit Logs',
+          systemSettings: 'System Settings',
+          logout: 'Logout',
+          totalRequests: 'Total Requests',
+          newRequests: 'New',
+          inProgress: 'In Progress',
+          resolved: 'Resolved',
+          escalated: 'Escalated',
+          recentActivity: 'Recent Activity',
+          totalUsers: 'Total Users',
+          resolutionRate: 'Resolution Rate',
+          slaCompliance: 'SLA Compliance',
+          type: 'Type',
+          subject: 'Subject',
+          description: 'Description',
+          category: 'Category',
+          priority: 'Priority',
+          attachments: 'Attachments',
+          submit: 'Submit',
+          cancel: 'Cancel',
+          save: 'Save',
+          delete: 'Delete',
+          edit: 'Edit',
+          view: 'View',
+          close: 'Close',
+          process: 'Process',
+          reply: 'Reply',
+          escalate: 'Escalate',
+          resolve: 'Resolve',
+          request: 'Request',
+          complaint: 'Complaint',
+          technical: 'Technical',
+          access: 'Access',
+          trainingCat: 'Training',
+          low: 'Low',
+          medium: 'Medium',
+          high: 'High',
+          statusNew: 'New',
+          statusInProgress: 'In Progress',
+          statusResolved: 'Resolved',
+          statusEscalated: 'Escalated',
+          statusClosed: 'Closed',
+          filterByStatus: 'Filter by Status',
+          allStatuses: 'All Statuses',
+          id: 'ID',
+          title: 'Title',
+          status: 'Status',
+          date: 'Date',
+          actions: 'Actions',
+          noResults: 'No results found.',
+          requestDetails: 'Request Details',
+          messageThread: 'Message Thread',
+          yourReply: 'Your Reply',
+          replyAndUpdate: 'Reply & Update',
+          escalateToAdmin: 'Escalate to Admin',
+          updateStatus: 'Update Status',
+          addUser: 'Add User',
+          editUser: 'Edit User',
+          fullName: 'Full Name',
+          email: 'Email',
+          department: 'Department',
+          phone: 'Phone',
+          userStatus: 'Status',
+          active: 'Active',
+          inactive: 'Inactive',
+          confirmDelete: 'Confirm Delete',
+          confirmDeleteMsg: 'Are you sure you want to delete this item?',
+          yes: 'Yes',
+          no: 'No',
+          delegateRole: 'Delegate Role',
+          closureMotive: 'Closure Motive',
+          finalResponse: 'Final Response',
+          addTemplate: 'Add Template',
+          templateName: 'Template Name',
+          templateType: 'Template Type',
+          subTasks: 'Sub-Tasks',
+          closureMotives: 'Closure Motives',
+          addItem: 'Add',
+          boxName: 'Box Name',
+          members: 'Members',
+          issueDescription: 'Issue Description',
+          addIssue: 'Add Issue',
+          requestsByType: 'Requests by Type',
+          requestsByCategory: 'Requests by Category',
+          requestsByDept: 'Requests by Department',
+          action: 'Action',
+          details: 'Details',
+          timestamp: 'Timestamp',
+          userId: 'User ID',
+          emailNotifications: 'Email Notifications',
+          sessionTimeout: 'Session Timeout',
+          enabled: 'Enabled',
+          disabled: 'Disabled',
+          minutes: 'minutes',
+          settingsSaved: 'Settings saved',
+          welcomeBack: 'Welcome back,',
+          quickActions: 'Quick Actions',
+          viewAll: 'View All',
+          from: 'From',
+          requestCreated: 'Request created successfully',
+          statusUpdated: 'Status updated',
+          userAdded: 'User added',
+          userUpdated: 'User updated',
+          userDeleted: 'User deleted',
+          requestEscalated: 'Request escalated',
+          requestResolved: 'Request resolved',
+          settingsNote: 'These settings are simulated for demo purposes.',
+          noMessages: 'No messages yet.',
+          assignedTo: 'Assigned To',
+          createdAt: 'Created At',
+          typeRequest: 'Request',
+          typeComplaint: 'Complaint',
+          hours: 'hours',
+          all: 'All',
+          adminSpace: 'Admin Space',
+          search: 'Search...',
+           searchFilter: 'Search / Filter',
+           fillRequiredFields: 'Please fill required fields',
+           pleaseSelectRequest: 'Please select a request',
+           pleaseTypeMessage: 'Please type a message',
+           messageSent: 'Message sent successfully',
+           replySent: 'Reply sent',
+           cannotDeleteSelf: 'Cannot delete current user',
+           viewNotFound: 'View not found.',
+           internal: 'Internal',
+           external: 'External',
+            system: 'System',
+            commonCustomization: 'Common Customization',
+            dashboardWidgets: 'Dashboard Widgets',
+            workflow: 'Workflow',
+            widgetRequests: 'Requests',
+            widgetUsers: 'Users',
+            widgetStats: 'Statistics',
+            widgetActivity: 'Recent Activity',
+            customizeWorkflow: 'Circulation Process',
+            newPassword: 'New Password',
+            leaveBlankToKeep: 'Leave blank to keep current',
+            resetPassword: 'Reset Password',
+            confirmNewPassword: 'Confirm New Password',
+            passwordsMismatch: 'Passwords do not match',
+            reassignTo: 'Reassign to',
+            saveReassignment: 'Save',
+            fileModelTemplate: 'File Template',
+            saveTemplate: 'Save Template'
+          },
+         ar: {
+          appName: 'Ø±ÙŠÙƒÙ„ÙŠØ²',
+          appSubtitle: 'Ù…Ù†ØµØ© Ø¯Ø¹Ù… Ø¥Ù„ÙŠØ³Ø§ â€” ÙˆØ²Ø§Ø±Ø© Ø§Ù„ØªØ¹Ù„ÙŠÙ… Ø§Ù„Ø¹Ø§Ù„ÙŠ',
+          login: 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„',
+          username: 'Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+          password: 'ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±',
+          role: 'Ø§Ù„Ø¯ÙˆØ±',
+          authenticate: 'Ù…ØµØ§Ø¯Ù‚Ø©',
+          roleUser: 'Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø§Ù„Ù†Ù‡Ø§Ø¦ÙŠ',
+          roleSupport: 'ÙØ±ÙŠÙ‚ Ø§Ù„Ø¯Ø¹Ù…',
+          roleAdmin: 'Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„',
+          dashboard: 'Ù„ÙˆØ­Ø© Ø§Ù„Ù‚ÙŠØ§Ø¯Ø©',
+          userManagement: 'Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ†',
+          escalatedRequests: 'Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø§Ù„Ù…ÙØµØ¹ÙŽÙ‘Ø¯Ø©',
+          correspondences: 'Ø§Ù„Ù…Ø±Ø§Ø³Ù„Ø§Øª',
+          referentials: 'Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹',
+          distributionBoxes: 'ØµÙ†Ø§Ø¯ÙŠÙ‚ Ø§Ù„ØªÙˆØ²ÙŠØ¹',
+          technicalProblems: 'Ø§Ù„Ù…Ø´ï¿½ï¿½ÙƒÙ„ Ø§Ù„ØªÙ‚Ù†ÙŠØ©',
+          statistics: 'Ø§Ù„Ø¥Ø­ØµØ§Ø¦ÙŠØ§Øª',
+          auditLogs: 'Ø³Ø¬Ù„Ø§Øª Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©',
+          systemSettings: 'Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ù†Ø¸Ø§Ù…',
+          logout: 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬',
+          totalRequests: 'Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ø·Ù„Ø¨Ø§Øª',
+          newRequests: 'Ø¬Ø¯ÙŠØ¯',
+          inProgress: 'Ù‚ÙŠØ¯ Ø§Ù„ØªÙ†ÙÙŠØ°',
+          resolved: 'ØªÙ… Ø§Ù„Ø­Ù„',
+          escalated: 'Ù…ÙØµØ¹ÙŽÙ‘Ø¯Ø©',
+          recentActivity: 'Ø§Ù„Ù†Ø´Ø§Ø· Ø§Ù„Ø£Ø®ÙŠØ±',
+          totalUsers: 'Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ†',
+          resolutionRate: 'Ù†Ø³Ø¨Ø© Ø§Ù„Ø­Ù„',
+          slaCompliance: 'Ø§Ù„ØªÙˆØ§ÙÙ‚ Ù…Ø¹ SLA',
+          type: 'Ø§Ù„Ù†ÙˆØ¹',
+          subject: 'Ø§Ù„Ù…ÙˆØ¶ÙˆØ¹',
+          description: 'Ø§Ù„ÙˆØµÙ',
+          category: 'Ø§Ù„ÙØ¦Ø©',
+          priority: 'Ø§Ù„Ø£ÙˆÙ„ÙˆÙŠØ©',
+          attachments: 'Ø§Ù„Ù…Ø±ÙÙ‚Ø§Øª',
+          submit: 'Ø¥Ø±Ø³Ø§Ù„',
+          cancel: 'Ø¥Ù„ØºØ§Ø¡',
+          save: 'Ø­ÙØ¸',
+          delete: 'Ø­Ø°Ù',
+          edit: 'ØªØ¹Ø¯ÙŠÙ„',
+          view: 'Ø¹Ø±Ø¶',
+          close: 'Ø¥ØºÙ„Ø§Ù‚',
+          process: 'Ù…Ø¹Ø§Ù„Ø¬Ø©',
+          reply: 'Ø±Ø¯',
+          escalate: 'ØªØµØ¹ÙŠØ¯',
+          resolve: 'Ø­Ù„',
+          request: 'Ø·Ù„Ø¨',
+          complaint: 'Ø´ÙƒÙˆÙ‰',
+          technical: 'ØªÙ‚Ù†ÙŠ',
+          access: 'ÙˆØµÙˆÙ„',
+          trainingCat: 'ØªØ¯Ø±ÙŠØ¨',
+          low: 'Ù…Ù†Ø®ÙØ¶Ø©',
+          medium: 'Ù…ØªÙˆØ³Ø·Ø©',
+          high: 'Ø¹Ø§Ù„ÙŠØ©',
+          statusNew: 'Ø¬Ø¯ÙŠØ¯',
+          statusInProgress: 'Ù‚ÙŠØ¯ Ø§Ù„ØªÙ†ÙÙŠØ°',
+          statusResolved: 'ØªÙ… Ø§Ù„Ø­Ù„',
+          statusEscalated: 'Ù…ÙØµØ¹ÙŽÙ‘Ø¯',
+          statusClosed: 'Ù…ØºÙ„Ù‚',
+          filterByStatus: 'ØªØµÙÙŠØ© Ø­Ø³Ø¨ Ø§Ù„Ø­Ø§Ù„Ø©',
+          allStatuses: 'Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø­Ø§Ù„Ø§Øª',
+          id: 'Ø§Ù„Ù…Ø¹Ø±Ù',
+          title: 'Ø§Ù„Ø¹Ù†ÙˆØ§Ù†',
+          status: 'Ø§Ù„Ø­Ø§Ù„Ø©',
+          date: 'Ø§Ù„ØªØ§Ø±ÙŠØ®',
+          actions: 'Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª',
+          noResults: 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬.',
+          requestDetails: 'ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø·Ù„Ø¨',
+          messageThread: 'Ø³Ù„Ø³Ù„Ø© Ø§Ù„Ø±Ø³Ø§Ø¦Ù„',
+          yourReply: 'Ø±Ø¯Ùƒ',
+          replyAndUpdate: 'Ø§Ù„Ø±Ø¯ ÙˆØ§Ù„ØªØ­Ø¯ÙŠØ«',
+          escalateToAdmin: 'ØªØµØ¹ÙŠØ¯ Ø¥Ù„Ù‰ Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„',
+          updateStatus: 'ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø­Ø§Ù„Ø©',
+          addUser: 'Ø¥Ø¶Ø§ÙØ© Ù…Ø³ØªØ®Ø¯Ù…',
+          editUser: 'ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+          fullName: 'Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„',
+          email: 'Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ',
+          department: 'Ø§Ù„Ù‚Ø³Ù…',
+          phone: 'Ø§Ù„Ù‡Ø§ØªÙ',
+          userStatus: 'Ø§Ù„Ø­Ø§Ù„Ø©',
+          active: 'Ù†Ø´Ø·',
+          inactive: 'ØºÙŠØ± Ù†Ø´Ø·',
+          confirmDelete: 'ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ø­Ø°Ù',
+          confirmDeleteMsg: 'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ù…Ù† Ø­Ø°Ù Ù‡Ø°Ø§ Ø§Ù„Ø¹Ù†ØµØ±ØŸ',
+          yes: 'Ù†Ø¹Ù…',
+          no: 'Ù„Ø§',
+          delegateRole: 'ØªÙÙˆÙŠØ¶ Ø§Ù„Ø¯ÙˆØ±',
+          closureMotive: 'Ø³Ø¨Ø¨ Ø§Ù„Ø¥ØºÙ„Ø§Ù‚',
+          finalResponse: 'Ø§Ù„Ø±Ø¯ Ø§Ù„Ù†Ù‡Ø§Ø¦ÙŠ',
+          addTemplate: 'Ø¥Ø¶Ø§ÙØ© Ù†Ù…ÙˆØ°Ø¬',
+          templateName: 'Ø§Ø³Ù… Ø§Ù„Ù†Ù…ÙˆØ°Ø¬',
+          templateType: 'Ù†ÙˆØ¹ Ø§Ù„Ù†Ù…ÙˆØ°Ø¬',
+          subTasks: 'Ø§Ù„Ù…Ù‡Ø§Ù… Ø§Ù„ÙØ±Ø¹ÙŠØ©',
+          closureMotives: 'Ø£Ø³Ø¨Ø§Ø¨ Ø§Ù„Ø¥ØºÙ„Ø§Ù‚',
+          addItem: 'Ø¥Ø¶Ø§ÙØ©',
+          boxName: 'Ø§Ø³Ù… Ø§Ù„ØµÙ†Ø¯ÙˆÙ‚',
+          members: 'Ø§Ù„Ø£Ø¹Ø¶Ø§Ø¡',
+          issueDescription: 'ÙˆØµÙ Ø§Ù„Ù…Ø´ÙƒÙ„Ø©',
+          addIssue: 'Ø¥Ø¶Ø§ÙØ© Ù…Ø´ÙƒÙ„Ø©',
+          requestsByType: 'Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø­Ø³Ø¨ Ø§Ù„Ù†ÙˆØ¹',
+          requestsByCategory: 'Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø­Ø³Ø¨ Ø§Ù„ÙØ¦Ø©',
+          requestsByDept: 'Ø§Ù„Ø·Ù„Ø¨Ø§Øª Ø­Ø³Ø¨ Ø§Ù„Ù‚Ø³Ù…',
+          action: 'Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡',
+          details: 'Ø§Ù„ØªÙØ§ØµÙŠÙ„',
+          timestamp: 'Ø§Ù„Ø·Ø§Ø¨Ø¹ Ø§Ù„Ø²Ù…Ù†ÙŠ',
+          userId: 'Ù…Ø¹Ø±Ù Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+          emailNotifications: 'Ø¥Ø´Ø¹Ø§Ø±Ø§Øª Ø§Ù„Ø¨Ø±ÙŠØ¯',
+          sessionTimeout: 'Ù…Ù‡Ù„Ø© Ø§Ù„Ø¬Ù„Ø³Ø©',
+          enabled: 'Ù…ÙØ¹Ù‘Ù„',
+          disabled: 'Ù…Ø¹Ø·Ù‘Ù„',
+          minutes: 'Ø¯Ù‚Ø§Ø¦Ù‚',
+          settingsSaved: 'ØªÙ… Ø­ÙØ¸ Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª',
+          welcomeBack: 'Ù…Ø±Ø­Ø¨Ù‹Ø§ØŒ',
+          quickActions: 'Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª Ø³Ø±ÙŠØ¹Ø©',
+          viewAll: 'Ø¹Ø±Ø¶ Ø§Ù„ÙƒÙ„',
+          from: 'Ù…Ù†',
+          requestCreated: 'ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø·Ù„Ø¨ Ø¨Ù†Ø¬Ø§Ø­',
+          statusUpdated: 'ØªÙ… ØªØ­Ø¯ÙŠØ« Ø§Ù„Ø­Ø§Ù„Ø©',
+          userAdded: 'ØªÙ… Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+          userUpdated: 'ØªÙ… ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+          userDeleted: 'ØªÙ… Ø­Ø°Ù Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…',
+          requestEscalated: 'ØªÙ… ØªØµØ¹ÙŠØ¯ Ø§Ù„Ø·Ù„Ø¨',
+          requestResolved: 'ØªÙ… Ø­Ù„ Ø§Ù„Ø·Ù„Ø¨',
+          settingsNote: 'Ù‡Ø°Ù‡ Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ù…Ø­Ø§ÙƒØ§Ø© Ù„Ø£ØºØ±Ø§Ø¶ Ø§Ù„Ø¹Ø±Ø¶.',
+          noMessages: 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø±Ø³Ø§Ø¦Ù„ Ø­ØªÙ‰ Ø§Ù„Ø¢Ù†.',
+          assignedTo: 'Ù…Ø®ØµØµ Ù„Ù€',
+          createdAt: 'ØªÙ… Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡ ÙÙŠ',
+          typeRequest: 'Ø·Ù„Ø¨',
+          typeComplaint: 'Ø´ÙƒÙˆÙ‰',
+          hours: 'Ø³Ø§Ø¹Ø§Øª',
+          all: 'Ø§Ù„ÙƒÙ„',
+          adminSpace: 'Ù…Ø³Ø§Ø­Ø© Ø§Ù„Ù…Ø³Ø¤ÙˆÙ„',
+          search: 'Ø¨Ø­Ø«...',
+           searchFilter: 'Ø¨Ø­Ø« / ØªØµÙÙŠØ©',
+           fillRequiredFields: 'ÙŠØ±Ø¬Ù‰ Ù…Ù„Ø¡ Ø§Ù„Ø­Ù‚ÙˆÙ„ Ø§Ù„Ù…Ø·Ù„ÙˆØ¨Ø©',
+           pleaseSelectRequest: 'ÙŠØ±Ø¬Ù‰ ØªØ­Ø¯ÙŠØ¯ Ø·Ù„Ø¨',
+           pleaseTypeMessage: 'ÙŠØ±Ø¬Ù‰ ÙƒØªØ§Ø¨Ø© Ø±Ø³Ø§Ù„Ø©',
+           messageSent: 'ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ø±Ø³Ø§Ù„Ø© Ø¨Ù†Ø¬Ø§Ø­',
+           replySent: 'ØªÙ… Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ø±Ø¯',
+           cannotDeleteSelf: 'Ù„Ø§ ÙŠÙ…ÙƒÙ† Ø­Ø°Ù Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø§Ù„Ø­Ø§Ù„ÙŠ',
+           viewNotFound: 'Ø§Ù„Ø¹Ø±Ø¶ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯.',
+           internal: 'Ø¯Ø§Ø®Ù„ÙŠ',
+           external: 'Ø®Ø§Ø±Ø¬ÙŠ',
+            system: 'Ø§Ù„Ù†Ø¸Ø§Ù…',
+            commonCustomization: 'Ø§Ù„ØªØ®ØµÙŠØµ Ø§Ù„Ù…Ø´ØªØ±Ùƒ',
+            dashboardWidgets: 'ÙˆÙŠØ¯Ø¬Ø§Øª Ù„ÙˆØ­Ø© Ø§Ù„Ù‚ÙŠØ§Ø¯Ø©',
+            workflow: 'Ø³ÙŠØ± Ø§Ù„Ø¹Ù…Ù„',
+            widgetRequests: 'Ø§Ù„Ø·Ù„Ø¨Ø§Øª',
+            widgetUsers: 'Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙˆÙ†',
+            widgetStats: 'Ø§Ù„Ø¥Ø­ØµØ§Ø¦ÙŠØ§Øª',
+            widgetActivity: 'Ø§Ù„Ù†Ø´Ø§Ø· Ø§Ù„Ø£Ø®ÙŠØ±',
+            customizeWorkflow: 'Ø¹Ù…Ù„ÙŠØ© Ø§Ù„ØªÙˆØ²ÙŠØ¹',
+            newPassword: 'ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø§Ù„Ø¬Ø¯ÙŠØ¯Ø©',
+            leaveBlankToKeep: 'Ø§ØªØ±ÙƒÙ‡ ÙØ§Ø±ØºØ§ Ù„Ù„Ø§Ø­ØªÙØ§Ø¸ Ø¨Ø§Ù„Ø­Ø§Ù„ÙŠ',
+            resetPassword: 'Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±',
+            confirmNewPassword: 'ØªØ£ÙƒÙŠØ¯ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± Ø§Ù„Ø¬Ø¯ÙŠØ¯Ø©',
+            passwordsMismatch: 'ÙƒÙ„Ù…ØªØ§ Ø§Ù„Ù…Ø±ÙˆØ± ØºÙŠØ± Ù…ØªØ·Ø§Ø¨Ù‚ØªÙŠÙ†',
+            reassignTo: 'Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† Ø¥Ù„Ù‰',
+            saveReassignment: 'Ø­ÙØ¸',
+            fileModelTemplate: 'Ù‚Ø§Ù„Ø¨ Ø§Ù„Ù…Ù„Ù',
+            saveTemplate: 'Ø­ÙØ¸ Ø§Ù„Ù‚Ø§Ù„Ø¨'
+          }
+        };
+
+      // Persistence disabled: state is kept in-memory only and resets on refresh.
+      let state = {
+        currentUser: null,
+        currentView: 'referentials',
+        lang: 'ar',
+        theme: 'dark'
+      };
+
+      let data = {};
+
+      function getDefaultData() {
+        return {
+          users: [
+            { id: 1, email: 'user@mesrs.tn', fullName: 'Ahmed Ben Ali', role: 'user', phone: '+216 71 000 001', dept: 'Finance', status: 'active', joined: '2024-01-15', avatar: 'AB' },
+            { id: 2, email: 'support@mesrs.tn', fullName: 'Sarra Mansour', role: 'support', phone: '+216 71 000 002', dept: 'IT Support', status: 'active', joined: '2024-02-01', avatar: 'SM' },
+            { id: 3, email: 'admin@mesrs.tn', fullName: 'Kamel Fathallah', role: 'admin', phone: '+216 71 000 003', dept: 'DIT', status: 'active', joined: '2023-11-20', avatar: 'KF' },
+            { id: 4, email: 'fatma@mesrs.tn', fullName: 'Fatma Cherif', role: 'user', phone: '+216 71 000 004', dept: 'HR', status: 'active', joined: '2024-03-10', avatar: 'FC' },
+            { id: 5, email: 'omar@mesrs.tn', fullName: 'Omar Tounsi', role: 'user', phone: '+216 71 000 005', dept: 'Procurement', status: 'active', joined: '2024-04-05', avatar: 'OT' }
+          ],
+          requests: [
+            { id: 1001, userId: 1, type: 'request', title: 'ProblÃ¨me de connexion ELISSA', description: 'Je ne peux pas accÃ©der au systÃ¨me ELISSA depuis ce matin.', category: 'technical', priority: 'high', status: 'new', attachments: ['capture_erreur.png'], createdAt: '2025-04-15T08:30:00', updatedAt: '2025-04-15T08:30:00', assignedTo: 2, escalatedToAdmin: false, messages: [{ from: 'user', text: 'Le message d\'erreur indique "Timeout de connexion".', time: '2025-04-15T08:35:00' }], supportResponse: '' },
+            { id: 1002, userId: 1, type: 'complaint', title: 'Retard dans le traitement du courrier', description: 'Mon courrier envoyÃ© il y a 2 semaines n\'a toujours pas Ã©tÃ© traitÃ©.', category: 'access', priority: 'medium', status: 'in_progress', attachments: ['courrier_ref.pdf'], createdAt: '2025-04-10T14:20:00', updatedAt: '2025-04-12T09:00:00', assignedTo: 2, escalatedToAdmin: false, messages: [{ from: 'user', text: 'Pouvez-vous vÃ©rifier la rÃ©fÃ©rence 2025/FIN/0042?', time: '2025-04-10T14:25:00' }, { from: 'support', text: 'Nous vÃ©rifions avec le service concernÃ©. Merci de patienter.', time: '2025-04-12T09:00:00' }], supportResponse: 'En cours de vÃ©rification.' },
+            { id: 1003, userId: 4, type: 'request', title: 'Demande de formation ELISSA', description: 'Je souhaite participer Ã  une formation sur les fonctionnalitÃ©s avancÃ©es d\'ELISSA.', category: 'training', priority: 'low', status: 'resolved', attachments: [], createdAt: '2025-03-20T10:00:00', updatedAt: '2025-03-25T16:00:00', assignedTo: 2, escalatedToAdmin: false, messages: [{ from: 'support', text: 'Votre inscription Ã  la session du 28 mars est confirmÃ©e.', time: '2025-03-22T11:00:00' }], supportResponse: 'Formation planifiÃ©e.' },
+            { id: 1004, userId: 5, type: 'complaint', title: 'Erreur dans l\'annuaire des correspondants', description: 'Mon dÃ©partement n\'apparaÃ®t pas dans la liste des destinataires.', category: 'technical', priority: 'high', status: 'escalated', attachments: ['screenshot.png', 'email_ref.pdf'], createdAt: '2025-04-08T09:15:00', updatedAt: '2025-04-14T11:30:00', assignedTo: 2, escalatedToAdmin: true, messages: [{ from: 'user', text: 'Cela bloque l\'envoi de tous mes courriers.', time: '2025-04-08T09:20:00' }, { from: 'support', text: 'Ce problÃ¨me nÃ©cessite une intervention de l\'administrateur. Escalade en cours.', time: '2025-04-14T11:30:00' }, { from: 'system', text: 'Demande escaladÃ©e Ã  l\'administrateur.', time: '2025-04-14T11:31:00' }], supportResponse: '' },
+            { id: 1005, userId: 1, type: 'request', title: 'RÃ©initialisation de mot de passe', description: 'J\'ai oubliÃ© mon mot de passe ELISSA et je ne peux pas le rÃ©initialiser.', category: 'access', priority: 'medium', status: 'resolved', attachments: [], createdAt: '2025-04-01T07:45:00', updatedAt: '2025-04-01T10:00:00', assignedTo: 2, escalatedToAdmin: false, messages: [{ from: 'support', text: 'Votre mot de passe a Ã©tÃ© rÃ©initialisÃ©. VÃ©rifiez votre email.', time: '2025-04-01T10:00:00' }], supportResponse: 'Mot de passe rÃ©initialisÃ©.' },
+            { id: 1006, userId: 4, type: 'request', title: 'AccÃ¨s au module statistiques', description: 'Je n\'ai pas les droits pour accÃ©der au module statistiques.', category: 'access', priority: 'low', status: 'new', attachments: [], createdAt: '2025-04-17T13:00:00', updatedAt: '2025-04-17T13:00:00', assignedTo: 2, escalatedToAdmin: false, messages: [], supportResponse: '' }
+          ],
+          messages: [],
+          auditLogs: [
+            { id: 1, action: 'LOGIN', userId: 3, details: 'Admin logged in', timestamp: '2025-04-17T08:00:00' },
+            { id: 2, action: 'CREATE_REQUEST', userId: 1, details: 'Request #1001 created', timestamp: '2025-04-15T08:30:00' },
+            { id: 3, action: 'UPDATE_STATUS', userId: 2, details: 'Request #1002 set to in_progress', timestamp: '2025-04-12T09:00:00' },
+            { id: 4, action: 'ESCALATE', userId: 2, details: 'Request #1004 escalated to admin', timestamp: '2025-04-14T11:30:00' },
+            { id: 5, action: 'RESOLVE', userId: 2, details: 'Request #1003 resolved', timestamp: '2025-03-25T16:00:00' },
+            { id: 6, action: 'RESOLVE', userId: 2, details: 'Request #1005 resolved', timestamp: '2025-04-01T10:00:00' }
+          ],
+          trainingSessions: [
+            { id: 1, title: 'Introduction Ã  ELISSA', dateTime: '2025-05-10T09:00', description: 'Formation de base pour les nouveaux utilisateurs du systÃ¨me ELISSA.', createdBy: 2 },
+            { id: 2, title: 'Gestion avancÃ©e des courriers', dateTime: '2025-05-15T14:00', description: 'FonctionnalitÃ©s avancÃ©es: modÃ¨les, signatures, workflow.', createdBy: 2 }
+          ],
+          assistGuides: [
+            { id: 1, title: 'Connexion Ã  ELISSA', content: '1. Ouvrir le navigateur\n2. Aller sur elissa.mesrs.tn\n3. Saisir identifiants\n4. Cliquer Connexion', category: 'technical' },
+            { id: 2, title: 'Envoi de courrier', content: '1. Cliquer Nouveau courrier\n2. Remplir les champs\n3. Joindre les documents\n4. Envoyer', category: 'technical' }
+          ],
+          correspondences: [
+            { id: 1, name: 'Note de service', type: 'Interne', template: '' },
+            { id: 2, name: 'Lettre officielle', type: 'Externe', template: '' },
+            { id: 3, name: 'Circulaire', type: 'Interne', template: '' }
+          ],
+          references: {
+            subTasks: ['VÃ©rification technique', 'Mise Ã  jour config', 'Test de validation', 'Documentation'],
+            closureMotives: ['RÃ©solu', 'Doublon', 'Non reproductible', 'Hors pÃ©rimÃ¨tre', 'AnnulÃ© par l\'utilisateur']
+          },
+          distributionBoxes: [
+            { id: 1, name: 'Casier DIT', members: ['Kamel Fathallah', 'Sarra Mansour'] },
+            { id: 2, name: 'Casier Finance', members: ['Ahmed Ben Ali'] },
+            { id: 3, name: 'Casier RH', members: ['Fatma Cherif'] }
+          ],
+          technicalIssues: [
+            { id: 1, description: 'Serveur ELISSA lent aux heures de pointe', status: 'open', createdAt: '2025-04-10' },
+            { id: 2, description: 'Certificat SSL expirÃ© sur le portail public', status: 'resolved', createdAt: '2025-03-28' }
+          ],
+          customWidgets: { requests: true, users: true, stats: true, activity: true },
+          workflow: '',
+          userRegistrations: [],
+          userCustomizations: {}
+        };
+      }
+
+      function loadData() {
+        data = getDefaultData();
+      }
+
+      function saveData() {
+        // Persistence is disabled for static behavior; page state lives only in memory.
+      }
+
+      function addAuditLog(action, details) {
+        data.auditLogs.push({
+          id: (data.auditLogs.length > 0 ? Math.max(...data.auditLogs.map(l => l.id)) + 1 : 1),
+          action,
+          userId: state.currentUser ? state.currentUser.id : 0,
+          details,
+          timestamp: new Date().toISOString()
+        });
+        saveData();
+      }
+
+      function t(key) {
+        return (i18n[state.lang] && i18n[state.lang][key]) || (i18n.en[key]) || key;
+      }
+
+      function nextId(arr) {
+        if (!arr || arr.length === 0) return 1;
+        return Math.max(...arr.map(item => item.id || 0)) + 1;
+      }
+
+      function fmtDate(dateStr) {
+        if (!dateStr) return 'â€”';
+        try {
+          const d = new Date(dateStr);
+          return d.toLocaleDateString(state.lang === 'ar' ? 'ar-TN' : state.lang === 'en' ? 'en-US' : 'fr-FR', {
+            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+        } catch (e) { return dateStr; }
+      }
+
+      function statusClass(status) { return 'status-' + (status || 'new').replace(' ', '-'); }
+      function statusLabel(status) {
+        const map = { new: 'statusNew', in_progress: 'statusInProgress', resolved: 'statusResolved', escalated: 'statusEscalated', closed: 'statusClosed' };
+        return t(map[status] || 'statusNew');
+      }
+
+      function getRequestIcon(category) {
+        const icons = {
+          technical: 'fa-cogs',
+          access: 'fa-key',
+          training: 'fa-graduation-cap',
+          complaint: 'fa-exclamation-triangle'
+        };
+        return icons[category] || 'fa-question-circle';
+      }
+
+      function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast-msg ${type}`;
+        toast.innerHTML = `<span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+      }
+
+      function showModal(content, isLarge = false) {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        
+        const modalBox = document.createElement('div');
+        modalBox.className = 'modal-box' + (isLarge ? ' modal-lg' : '');
+        modalBox.innerHTML = content;
+        
+        overlay.appendChild(modalBox);
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+      }
+
+      function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.remove()); }
+      function getUserById(id) { return data.users.find(u => u.id === id); }
+
+      function toggleTheme() {
+        var currentTheme = document.documentElement.getAttribute('data-bs-theme');
+        var newTheme = currentTheme === 'dark' ? 'Light' : 'Dark';
+        var langCode = 'ar';
+        var langMap = { ar: 'AR', en: 'EN', fr: 'FR' };
+        var prefix = langMap[langCode] || 'FR';
+        var suffix = newTheme === 'Dark' ? '-Dark' : '-white';
+        var folder = prefix + suffix;
+        var currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+        var pathParts = window.location.pathname.replace(/\\/g,'/').split('/');
+        var roleIdx = -1;
+        ['login','admin','support','user'].forEach(function(r,i){ 
+          var idx = pathParts.indexOf(r); 
+          if(idx>=0) roleIdx = idx; 
+        });
+        if (roleIdx >= 0) {
+          pathParts[roleIdx+1] = newTheme;
+          pathParts[roleIdx+2] = folder;
+          window.location.href = pathParts.join('/');
+        } else {
+          window.location.href = '../../' + newTheme + '/' + folder + '/' + currentPage;
+        }
+      }
+      function setLanguage(newLang) {
+        var langMap = { ar: 'AR', en: 'EN', fr: 'FR' };
+        var prefix = langMap[newLang] || 'FR';
+        var themeNow = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'Dark' : 'Light';
+        var suffix = themeNow === 'Dark' ? '-Dark' : '-white';
+        var folder = prefix + suffix;
+        var currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+        window.location.href = '../' + folder + '/' + currentPage;
+      }
+
+      function toggleLangMenu() { const menu = document.getElementById('langMenu'); if (menu) menu.classList.toggle('show'); }
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+      }
+
+      function handleLogout() { window.location.href = '../../../login/Dark/AR-Dark/login.html'; }
+
+      function renderSidebar() {
+        const role = 'admin';
+        const items = [
+          { view: 'dashboard', icon: 'fa-gauge-high', label: 'dashboard' },
+          { view: 'user-management', icon: 'fa-users-gear', label: 'userManagement' },
+          { view: 'escalated-requests', icon: 'fa-arrow-up-right-dots', label: 'escalatedRequests' },
+          { view: 'correspondences', icon: 'fa-file-lines', label: 'correspondences' },
+          { view: 'referentials', icon: 'fa-tags', label: 'referentials' },
+          { view: 'distribution-boxes', icon: 'fa-boxes-stacked', label: 'distributionBoxes' },
+          { view: 'technical-problems', icon: 'fa-bug', label: 'technicalProblems' },
+          { view: 'common-customization', icon: 'fa-sliders', label: 'commonCustomization' },
+          { view: 'statistics', icon: 'fa-chart-pie', label: 'statistics' },
+          { view: 'audit-logs', icon: 'fa-scroll', label: 'auditLogs' },
+          { view: 'system-settings', icon: 'fa-gear', label: 'systemSettings' }
+        ];
+        
+
+        const navEl = document.getElementById('sidebarNav');
+        navEl.innerHTML = (items || []).map(item => `
+          <li class="nav-item">
+            <a class="nav-link ${state.currentView === item.view ? 'active' : ''}" onclick="RecLise.navigate('${item.view}')">
+              <i class="fas ${item.icon}"></i>
+              <span>${t(item.label)}</span>
+            </a>
+          </li>
+        `).join('');
+
+        document.getElementById('sidebarFooter').innerHTML = `
+          <button class="btn-logout" onclick="RecLise.handleLogout()" title="${t('logout')}">
+            <span>${t('logout')}</span>
+            <i class="fas fa-right-from-bracket"></i>
+          </button>
+        `;
+      }
+
+      function navigate(view) { window.location.href = view + '.html'; }
+
+      function renderContent(view) {
+        const main = document.getElementById('mainContent');
+        const renderers = {
+          'dashboard': renderAdminDashboard,
+          'user-management': renderUserManagement,
+          'escalated-requests': renderEscalatedRequests,
+          'correspondences': renderCorrespondences,
+          'referentials': renderReferentials,
+          'distribution-boxes': renderDistributionBoxes,
+          'technical-problems': renderTechnicalProblems,
+          'common-customization': renderCommonCustomization,
+          'statistics': renderStatistics,
+          'audit-logs': renderAuditLogs,
+          'system-settings': renderSystemSettings
+        };
+
+        const renderer = renderers[view];
+        if (renderer) {
+          main.innerHTML = '';
+          renderer(main);
+        } else {
+          main.innerHTML = `<div class="empty-state"><i class="fas fa-question-circle"></i><p>${t('viewNotFound')}</p></div>`;
+        }
+
+        const navItemsList = [
+          { view: 'dashboard', label: 'dashboard' },
+          { view: 'user-management', label: 'userManagement' },
+          { view: 'escalated-requests', label: 'escalatedRequests' },
+          { view: 'correspondences', label: 'correspondences' },
+          { view: 'referentials', label: 'referentials' },
+          { view: 'distribution-boxes', label: 'distributionBoxes' },
+          { view: 'technical-problems', label: 'technicalProblems' },
+          { view: 'common-customization', label: 'commonCustomization' },
+          { view: 'statistics', label: 'statistics' },
+          { view: 'audit-logs', label: 'auditLogs' },
+          { view: 'system-settings', label: 'systemSettings' }
+        ];
+        const item = navItemsList.find(n => n.view === view);
+        document.getElementById('topbarTitle').textContent = item ? t(item.label) : t('dashboard');
+      }
+
+      function statCard(icon, label, value, color) {
+        const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        const colors = { warning: '#F59E0B', info: '#3B82F6', success: '#10B981', danger: '#EF4444', brand: '#025C84', neon: 'var(--brand-accent)' };
+        const c = colors[color] || colors.info;
+        const iconOpacity = isDark ? '1' : '0.35';
+
+        const iconMap = {
+          'fa-users': `<path opacity="0.35"
+                    d="M544.947 37.0526C550.761 37.0526 555.474 32.3398 555.474 26.5263C555.474 20.7128 550.761 16 544.947 16C539.134 16 534.421 20.7128 534.421 26.5263C534.421 32.3398 539.134 37.0526 544.947 37.0526Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M557.579 43.3687H532.316C528.827 43.3687 526 46.196 526 49.6844C526 53.1729 528.827 56.0002 532.316 56.0002H557.579C561.067 56.0002 563.895 53.1729 563.895 49.6844C563.895 46.196 561.067 43.3687 557.579 43.3687Z"
+                    fill="var(--icon-color)" />`,
+          'fa-inbox': `<path opacity="0.35"
+                    d="M49.3 51.1998H22.7C19.5517 51.1998 17 48.6481 17 45.4998V26.4998C17 23.3515 19.5517 20.7998 22.7 20.7998H49.3C52.4483 20.7998 55 23.3515 55 26.4998V45.4998C55 48.6481 52.4483 51.1998 49.3 51.1998Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M32.0898 35.5533L17 26.4998C17 23.3515 19.5517 20.7998 22.7 20.7998H49.3C52.4483 20.7998 55 23.3515 55 26.4998L39.9102 35.5533C37.5029 36.9973 34.4971 36.9973 32.0898 35.5533Z"
+                    fill="var(--icon-color)" />`,
+          'fa-spinner': `<path opacity="0.35"
+                    d="M121.163 27.5377C121.583 30.6599 123.224 37.8356 129.695 44.3067C136.166 50.7779 143.34 52.4193 146.464 52.8386C148.727 53.3278 151.181 52.7064 152.939 50.9479C155.689 48.1977 145.728 38.236 142.977 40.9862L141.223 42.7409L131.261 32.7792L133.014 31.0245C135.764 28.2743 125.802 18.3126 123.052 21.0627C121.294 22.8212 120.672 25.2748 121.163 27.5377Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M123.059 21.0572L133.018 31.017C135.763 28.265 135.763 23.8111 133.013 21.061C130.266 18.3146 125.811 18.3127 123.059 21.0572Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M142.981 40.9805L152.941 50.9403C155.686 48.1902 155.686 43.7344 152.936 40.9843C150.187 38.2379 145.733 38.236 142.981 40.9805Z"
+                    fill="var(--icon-color)" />`,
+          'fa-check-circle': `<path opacity="0.35"
+                    d="M240 35C244.418 35 248 31.4183 248 27C248 22.5817 244.418 19 240 19C235.582 19 232 22.5817 232 27C232 31.4183 235.582 35 240 35Z"
+                    fill="var(--icon-color)" />
+                <path opacity="0.35"
+                    d="M225 39C227.761 39 230 36.7614 230 34C230 31.2386 227.761 29 225 29C222.239 29 220 31.2386 220 34C220 36.7614 222.239 39 225 39Z"
+                    fill="var(--icon-color)" />
+                <path opacity="0.35"
+                    d="M255 39C257.761 39 260 36.7614 260 34C260 31.2386 257.761 29 255 29C252.239 29 250 31.2386 250 34C250 36.7614 252.239 39 255 39Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M246 53H234C230.686 53 228 49.866 228 46C228 42.134 230.686 39 234 39H246C249.314 39 252 42.134 252 46C252 49.866 249.314 53 246 53Z"
+                    fill="var(--icon-color)" />
+                <path opacity="0.35"
+                    d="M259.102 43H220.744C218.124 43 216 45.124 216 47.744V48.258C216 50.876 218.124 53 220.744 53H259.102C261.806 53 264 50.806 264 48.1V47.898C264 45.194 261.806 43 259.102 43Z"
+                    fill="var(--icon-color)" />`,
+          'fa-arrow-up': `<path opacity="0.35"
+                    d="M341 58C353.15 58 363 48.1503 363 36C363 23.8497 353.15 14 341 14C328.85 14 319 23.8497 319 36C319 48.1503 328.85 58 341 58Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M333.729 38.2002C332.372 38.2002 331.69 39.837 332.645 40.8006L339.432 47.6514C340.296 48.5226 341.704 48.5226 342.569 47.6514L349.356 40.8006C350.311 39.837 349.626 38.2002 348.271 38.2002H333.729Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M343.2 40.3998C343.2 40.3998 343.2 25.7654 343.2 24.9998C343.2 23.7854 342.214 22.7998 341 22.7998C339.785 22.7998 338.8 23.7854 338.8 24.9998C338.8 25.7654 338.8 40.3998 338.8 40.3998H343.2Z"
+                    fill="var(--icon-color)" />`,
+          'fa-clock': `<path opacity="0.35"
+                    d="M443.25 53C442.168 53 441.067 52.5943 440.236 51.7443C439.406 50.9136 427.409 40.9261 425.419 38.9557C420.86 34.3966 420.86 26.9977 425.419 22.4193C429.998 17.8602 437.397 17.8602 441.956 22.4193C442.439 22.9216 442.864 23.4625 443.25 24.0034L447.398 34.2324L443.25 53Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M443.25 53C444.332 53 445.433 52.5943 446.264 51.7443C447.094 50.9136 459.091 40.9261 461.081 38.9557C465.64 34.3966 465.64 26.9977 461.081 22.4193C456.502 17.8602 449.103 17.8602 444.544 22.4193C444.061 22.9216 443.636 23.4625 443.25 24.0034V36.3864V53Z"
+                    fill="var(--icon-color)" />`,
+          'fa-check-double': `<path
+                    d="M35.8946 112.578C35.8982 111.705 35.1896 110.996 34.3163 111L24.7927 111.043C23.5222 111.048 22.8905 112.584 23.7888 113.482L33.4108 123.104C34.3091 124.002 35.8445 123.371 35.8499 122.1L35.8946 112.578Z"
+                    fill="var(--icon-color)" />
+                <path opacity="0.35"
+                    d="M25.1579 145H21.5789C19.6016 145 18 143.399 18 141.421V139.632C18 137.654 19.6016 136.053 21.5789 136.053H25.1579C27.1353 136.053 28.7368 137.654 28.7368 139.632V141.421C28.7368 143.399 27.1353 145 25.1579 145Z"
+                    fill="var(--icon-color)" />
+                <path opacity="0.35"
+                    d="M37.6843 145H34.1053C32.1279 145 30.5264 143.399 30.5264 141.421V130.684C30.5264 128.707 32.1279 127.105 34.1053 127.105H37.6843C39.6616 127.105 41.2632 128.707 41.2632 130.684V141.421C41.2632 143.399 39.6616 145 37.6843 145Z"
+                    fill="var(--icon-color)" />
+                <path opacity="0.35"
+                    d="M50.2106 145H46.6317C44.6543 145 43.0527 143.398 43.0527 141.421V114.579C43.0527 112.602 44.6543 111 46.6317 111H50.2106C52.188 111 53.7896 112.602 53.7896 114.579V141.421C53.7896 143.398 52.188 145 50.2106 145Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M21.1818 128.894C20.3676 128.894 19.5533 128.583 18.9324 127.962C17.6905 126.72 17.6905 124.705 18.9324 123.463L26.8848 115.511C28.1267 114.269 30.1417 114.269 31.3836 115.511C32.6255 116.753 32.6255 118.768 31.3836 120.01L23.4311 127.962C22.8102 128.583 21.996 128.894 21.1818 128.894Z"
+                    fill="var(--icon-color)" />`,
+          'fa-percent': `<path opacity="0.35"
+                    d="M153.984 136.87L144.009 126.874C143.186 126.05 141.854 126.047 141.027 126.865L140.69 127.199L131.174 117.683C130.605 115.977 129.531 114.486 128.093 113.407L124.868 110.99C123.978 110.323 122.733 110.41 121.947 111.197L121.197 111.948C120.409 112.734 120.322 113.978 120.989 114.869L123.407 118.093C124.486 119.532 125.977 120.605 127.682 121.174L137.183 130.675L136.881 130.973C136.05 131.795 136.046 133.138 136.872 133.965L146.872 143.984C148.836 145.948 152.02 145.948 153.986 143.984C155.948 142.02 155.948 138.836 153.984 136.87Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M122.02 143.98C123.991 145.951 127.188 145.951 129.159 143.98L144.982 128.189L137.877 121.016L122.02 136.843C120.049 138.812 120.049 142.009 122.02 143.98Z"
+                    fill="var(--icon-color)" />
+                <path
+                    d="M148.848 122.09C147.401 123.537 144.999 123.448 143.668 121.822C142.513 120.408 142.759 118.303 144.051 117.011L147.998 113.064C148.728 112.334 148.392 111.067 147.389 110.826C145.927 110.477 144.349 110.433 142.712 110.788C138.646 111.671 135.406 115.002 134.679 119.097C133.388 126.377 139.623 132.613 146.903 131.321C151.001 130.595 154.33 127.355 155.211 123.287C155.566 121.65 155.524 120.071 155.173 118.61C154.932 117.606 153.666 117.271 152.937 117.999C151.186 119.754 149.232 121.705 148.848 122.09Z"
+                    fill="var(--icon-color)" />`,
+          'fa-shield-check': `<path opacity="0.35" d="M236.06 120.119H224.238V143.762H236.06V120.119Z" fill="var(--icon-color)" />
+                <path opacity="0.35"
+                    d="M255.763 145.732H238.03V114.208C238.03 112.031 239.794 110.267 241.971 110.267H253.793C255.97 110.267 257.733 112.031 257.733 114.208V143.762C257.733 144.85 256.851 145.732 255.763 145.732Z"
+                    fill="var(--icon-color)" />
+                <path d="M253.792 118.148H249.852V114.208H253.792V118.148Z" fill="var(--icon-color)" />
+                <path d="M245.911 118.148H241.971V114.208H245.911V118.148Z" fill="var(--icon-color)" />
+                <path d="M253.792 126.029H249.852V122.089H253.792V126.029Z" fill="var(--icon-color)" />
+                <path d="M245.911 126.029H241.971V122.089H245.911V126.029Z" fill="var(--icon-color)" />
+                <path d="M253.792 133.911H249.852V129.97H253.792V133.911Z" fill="var(--icon-color)" />
+                <path d="M245.911 133.911H241.971V129.97H245.911V133.911Z" fill="var(--icon-color)" />
+                <path d="M253.792 141.792H249.852V137.851H253.792V141.792Z" fill="var(--icon-color)" />
+                <path d="M245.911 141.792H241.971V137.851H245.911V141.792Z" fill="var(--icon-color)" />
+                <path
+                    d="M234.089 116.178H226.208C224.031 116.178 222.268 117.941 222.268 120.118V143.762C222.268 144.85 223.15 145.732 224.238 145.732H238.03V120.118C238.03 117.941 236.267 116.178 234.089 116.178ZM234.089 141.792H226.208V137.851H234.089V141.792ZM234.089 133.91H226.208V129.97H234.089V133.91ZM234.089 126.029H226.208V122.089H234.089V126.029Z"
+                    fill="var(--icon-color)" />`,
+        };
+
+        const viewBoxMap = {
+          'fa-users': '509 0 72 72',
+          'fa-inbox': '0 0 72 72',
+          'fa-spinner': '102 0 72 72',
+          'fa-check-circle': '204 0 72 72',
+          'fa-arrow-up': '305 0 72 72',
+          'fa-clock': '407 0 72 72',
+          'fa-check-double': '0 92 72 72',
+          'fa-percent': '102 92 72 72',
+          'fa-shield-check': '204 92 72 72',
+        };
+
+        const svgContent = iconMap[icon] || `<circle cx="36" cy="36" r="20" fill="var(--icon-color)" opacity="0.5"/>`;
+        const vb = viewBoxMap[icon] || '0 0 72 72';
+
+        return `
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <svg width="40" height="40" viewBox="${vb}" fill="none" xmlns="http://www.w3.org/2000/svg" class="display-block">
+                  ${svgContent}
+                </svg>
+              </div>
+              <div class="stat-value">${value}</div>
+              <div class="stat-label">${label}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAdminDashboard(container) {
+        const totalUsers = data.users.length;
+        const totalReqs = data.requests.length;
+        const resolved = data.requests.filter(r => r.status === 'resolved' || r.status === 'closed').length;
+        const rate = totalReqs > 0 ? Math.round((resolved / totalReqs) * 100) : 0;
+
+        container.innerHTML = `
+          <div class="section-header"><h2>${t('welcomeBack')} ${state.currentUser.fullName}</h2></div>
+          <div class="row g-3 mb-4">
+            ${statCard('fa-users', t('totalUsers'), totalUsers, 'info')}
+            ${statCard('fa-inbox', t('totalRequests'), totalReqs, 'brand')}
+            ${statCard('fa-percent', t('resolutionRate'), rate + '%', 'success')}
+            ${statCard('fa-shield-check', t('slaCompliance'), '98%', 'neon')}
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="glass-card">
+                <h5 class="margin-bottom-16">${t('recentActivity')}</h5>
+                ${data.auditLogs.slice(-5).reverse().map(log => `
+                  <div class="activity-item">
+                    <div class="activity-dot"></div>
+                    <div>
+                      <div class="activity-text"><strong>${log.action}</strong> â€” ${log.details}</div>
+                      <div class="activity-time">${fmtDate(log.timestamp)}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="glass-card">
+                <h5 class="margin-bottom-16">${t('quickActions')}</h5>
+                <div class="d-grid gap-2">
+                  <button class="btn btn-outline-neon" onclick="RecLise.navigate('user-management')"><i class="fas fa-users-gear me-2"></i>${t('userManagement')}</button>
+                  <button class="btn btn-outline-neon" onclick="RecLise.navigate('escalated-requests')"><i class="fas fa-arrow-up-right-dots me-2"></i>${t('escalatedRequests')}</button>
+                  <button class="btn btn-outline-neon" onclick="RecLise.navigate('statistics')"><i class="fas fa-chart-pie me-2"></i>${t('statistics')}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderUserManagement(container) {
+        container.innerHTML = `
+          <div class="section-header" style="flex-wrap:wrap; gap:12px;">
+            <h2>${t('userManagement')}</h2>
+            <div style="display:flex; gap:8px; align-items:center; margin-left:auto;">
+              <input type="text" class="form-control" id="userSearchInput" placeholder="${t('search')}" oninput="RecLise.filterUsers(this.value)" style="width:260px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--input-text);">
+              <button class="btn btn-neon btn-sm" onclick="RecLise.showAddUserModal()"><i class="fas fa-plus me-1"></i>${t('addUser')}</button>
+            </div>
+          </div>
+          <div class="glass-card overflow-auto">
+            <table class="table-glass">
+              <thead><tr>
+                <th>${t('id')}</th><th>${t('fullName')}</th><th>${t('email')}</th><th>${t('role')}</th><th>${t('department')}</th><th>${t('status')}</th><th>${t('actions')}</th>
+              </tr></thead>
+              <tbody id="userTableBody">
+                ${getUserRows(data.users)}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      function getUserRows(users) {
+        return users.map(u => `
+          <tr>
+            <td>#${u.id}</td><td>${u.fullName}</td><td>${u.email}</td>
+            <td><span class="status-pill status-accent">${u.role}</span></td>
+            <td>${u.dept || 'â€”'}</td>
+            <td><span class="status-pill ${u.status === 'active' ? 'status-resolved' : 'status-closed'}">${u.status === 'active' ? t('active') : t('inactive')}</span></td>
+            <td>
+              <div class="flex-gap-4 flex-wrap">
+                <button class="btn btn-outline-neon btn-sm" onclick="RecLise.showEditUserModal(${u.id})" title="${t('edit')}"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-warning" onclick="RecLise.showResetPasswordModal(${u.id})" title="${t('resetPassword')}"><i class="fas fa-key"></i></button>
+                <button class="btn btn-sm btn-warning" onclick="RecLise.showDelegateModal(${u.id})" title="${t('delegateRole')}"><i class="fas fa-user-shield"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="RecLise.deleteUser(${u.id})" title="${t('delete')}"><i class="fas fa-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      function filterUsers(searchTerm) {
+        const term = (searchTerm || '').toLowerCase();
+        const filtered = !term
+          ? data.users
+          : data.users.filter(u =>
+              (u.fullName && u.fullName.toLowerCase().includes(term)) ||
+              (u.email && u.email.toLowerCase().includes(term)) ||
+              (u.dept && u.dept.toLowerCase().includes(term))
+            );
+        const tbody = document.getElementById('userTableBody');
+        if (tbody) {
+          tbody.innerHTML = getUserRows(filtered);
+        }
+      }
+
+      function showAddUserModal() {
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3>${t('addUser')}</h3>
+          <div class="mb-3"><label class="form-label">${t('fullName')}</label><input class="form-control" id="uName" required></div>
+          <div class="mb-3"><label class="form-label">${t('email')}</label><input class="form-control" id="uEmail" type="email" required></div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">${t('role')}</label>
+              <select class="form-select" id="uRole"><option value="user">${t('roleUser')}</option><option value="support">${t('roleSupport')}</option><option value="admin">${t('roleAdmin')}</option></select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">${t('department')}</label><input class="form-control" id="uDept">
+            </div>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6"><label class="form-label">${t('phone')}</label><input class="form-control" id="uPhone"></div>
+            <div class="col-md-6"><label class="form-label">${t('password')}</label><input class="form-control" type="password" id="uPass"></div>
+          </div>
+          <button class="btn btn-neon" onclick="RecLise.addUser()">${t('save')}</button>
+        `;
+        showModal(content);
+      }
+
+      function addUser() {
+        const name = document.getElementById('uName').value.trim();
+        const email = document.getElementById('uEmail').value.trim();
+        if (!name || !email) return showToast(t('fillRequiredFields'), 'error');
+        const user = {
+          id: nextId(data.users),
+          fullName: name,
+          email: email,
+          role: document.getElementById('uRole').value,
+          phone: document.getElementById('uPhone').value.trim(),
+          dept: document.getElementById('uDept').value.trim(),
+          status: 'active',
+          joined: new Date().toISOString().split('T')[0],
+          avatar: name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+        };
+        data.users.push(user);
+        saveData();
+        addAuditLog('ADD_USER', `User added: ${user.fullName} (${user.role})`);
+        showToast(t('userAdded'), 'success');
+        closeModal();
+        renderContent('user-management');
+      }
+
+      function showEditUserModal(id) {
+        const u = getUserById(id);
+        if (!u) return;
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3>${t('editUser')}</h3>
+          <div class="mb-3"><label class="form-label">${t('fullName')}</label><input class="form-control" id="euName" value="${u.fullName}"></div>
+          <div class="mb-3"><label class="form-label">${t('email')}</label><input class="form-control" id="euEmail" value="${u.email}"></div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6"><label class="form-label">${t('department')}</label><input class="form-control" id="euDept" value="${u.dept || ''}"></div>
+            <div class="col-md-6"><label class="form-label">${t('phone')}</label><input class="form-control" id="euPhone" value="${u.phone || ''}"></div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">${t('userStatus')}</label>
+            <select class="form-select" id="euStatus"><option value="active" ${u.status === 'active' ? 'selected' : ''}>${t('active')}</option><option value="inactive" ${u.status === 'inactive' ? 'selected' : ''}>${t('inactive')}</option></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">${t('newPassword')}</label>
+            <input type="password" class="form-control" id="euPassword" placeholder="${t('leaveBlankToKeep')}">
+          </div>
+          <button class="btn btn-neon" onclick="RecLise.updateUser(${id})">${t('save')}</button>
+        `;
+        showModal(content);
+      }
+
+      function updateUser(id) {
+        const u = getUserById(id);
+        if (!u) return;
+        u.fullName = document.getElementById('euName').value.trim() || u.fullName;
+        u.email = document.getElementById('euEmail').value.trim() || u.email;
+        u.dept = document.getElementById('euDept').value.trim();
+        u.phone = document.getElementById('euPhone').value.trim();
+        u.status = document.getElementById('euStatus').value;
+        u.avatar = u.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const newPw = document.getElementById('euPassword').value;
+        if (newPw && newPw.length > 0) {
+          u.password = newPw;
+          addAuditLog('USER_PASSWORD_CHANGE', 'Password changed for user #' + id + ': ' + u.fullName);
+        }
+        saveData();
+        addAuditLog('UPDATE_USER', `User #${id} updated: ${u.fullName}`);
+        showToast(t('userUpdated'), 'success');
+        closeModal();
+        renderContent('user-management');
+      }
+
+      function deleteUser(id) {
+        if (id === state.currentUser.id) return showToast(t('cannotDeleteSelf'), 'error');
+        showConfirmModal(() => {
+          data.users = data.users.filter(u => u.id !== id);
+          saveData();
+          addAuditLog('DELETE_USER', `User #${id} deleted`);
+          showToast(t('userDeleted'), 'info');
+          renderContent('user-management');
+        });
+      }
+
+      function showResetPasswordModal(id) {
+        var u = getUserById(id);
+        if (!u) return;
+        var content = '<button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>';
+        content += '<h3>' + t('resetPassword') + '</h3>';
+        content += '<p class="text-secondary margin-bottom-20">' + u.fullName + ' (' + u.email + ')</p>';
+        content += '<div class="mb-3"><label class="form-label">' + t('newPassword') + '</label><input type="password" class="form-control" id="rpNewPw" required></div>';
+        content += '<div class="mb-3"><label class="form-label">' + t('confirmNewPassword') + '</label><input type="password" class="form-control" id="rpConfirmPw" required></div>';
+        content += '<button class="btn btn-neon" onclick="RecLise.resetPassword(' + id + ')">' + t('save') + '</button>';
+        showModal(content);
+      }
+
+      function resetPassword(id) {
+        var newPw = document.getElementById('rpNewPw').value;
+        var confirmPw = document.getElementById('rpConfirmPw').value;
+        if (!newPw || !confirmPw) return showToast(t('fillRequiredFields'), 'error');
+        if (newPw !== confirmPw) return showToast(t('passwordsMismatch'), 'error');
+        var u = getUserById(id);
+        if (!u) return;
+        u.password = newPw;
+        saveData();
+        addAuditLog('USER_PASSWORD_RESET', 'Password reset for user #' + id + ': ' + u.fullName);
+        showToast(t('save') + ' âœ“', 'success');
+        closeModal();
+      }
+
+      function showDelegateModal(id) {
+        const u = getUserById(id);
+        if (!u) return;
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3>${t('delegateRole')} â€” ${u.fullName}</h3>
+          <div class="mb-3">
+            <label class="form-label">${t('role')}</label>
+            <select class="form-select" id="dlgRole">
+              <option value="user" ${u.role === 'user' ? 'selected' : ''}>${t('roleUser')}</option>
+              <option value="support" ${u.role === 'support' ? 'selected' : ''}>${t('roleSupport')}</option>
+              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>${t('roleAdmin')}</option>
+            </select>
+          </div>
+          <button class="btn btn-neon" onclick="RecLise.delegateRole(${id})">${t('save')}</button>
+        `;
+        showModal(content);
+      }
+
+      function delegateRole(id) {
+        const u = getUserById(id);
+        if (!u) return;
+        const newRole = document.getElementById('dlgRole').value;
+        u.role = newRole;
+        saveData();
+        addAuditLog('DELEGATE_ROLE', `User #${id} role changed to ${newRole}`);
+        showToast(t('userUpdated'), 'success');
+        closeModal();
+        renderContent('user-management');
+      }
+
+      function renderEscalatedRequests(container) {
+        const reqs = data.requests.filter(r => r.escalatedToAdmin === true);
+        container.innerHTML = `
+          <div class="section-header"><h2><i class="fas fa-arrow-up-right-dots me-2"></i>${t('escalatedRequests')}</h2></div>
+          <div class="glass-card" style="overflow-x:auto;">
+            <table class="table-glass">
+              <thead><tr><th>${t('id')}</th><th>${t('title')}</th><th>${t('type')}</th><th>${t('priority')}</th><th>${t('status')}</th><th>${t('date')}</th><th>${t('actions')}</th></tr></thead>
+              <tbody>
+                ${reqs.length ? reqs.map(r => `
+                  <tr>
+                    <td>#${r.id}</td><td>${r.title}</td>
+                    <td>${r.type === 'complaint' ? t('complaint') : t('request')}</td>
+                    <td><span class="priority-${r.priority}">${t(r.priority)}</span></td>
+                    <td><span class="status-pill ${statusClass(r.status)}">${statusLabel(r.status)}</span></td>
+                    <td>${fmtDate(r.updatedAt)}</td>
+                    <td>
+                      <button class="btn btn-outline-neon btn-sm" onclick="RecLise.viewRequestDetail(${r.id})">${t('view')}</button>
+                      ${r.status !== 'resolved' && r.status !== 'closed' ? `<button class="btn btn-neon btn-sm" style="margin-left:4px;" onclick="RecLise.showResolveEscalatedModal(${r.id})">${t('resolve')}</button>` : ''}
+                    </td>
+                  </tr>
+                `).join('') : `<tr><td colspan="7" class="text-center" style="padding:30px;color:var(--text-secondary)">${t('noResults')}</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      function viewRequestDetail(id) {
+        const req = data.requests.find(r => r.id === id);
+        if (!req) return;
+        const user = getUserById(req.userId);
+        const assignee = getUserById(req.assignedTo);
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3><i class="fas fa-eye me-2"></i>${t('requestDetails')} â€” #${req.id}</h3>
+          
+          <!-- Request Overview Card -->
+          <div class="glass-card mb-3" style="padding:16px;border-left:4px solid var(--warning);">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h5 style="margin:0;"><i class="fas fa-info-circle me-2"></i>${t('requestDetails')}</h5>
+              <span class="status-pill ${statusClass(req.status)}">${statusLabel(req.status)}</span>
+            </div>
+            <div class="row text-center mb-3">
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">${t('type')}</div>
+                <div style="font-weight:600;"><i class="fas ${req.type === 'complaint' ? 'fa-exclamation-triangle' : 'fa-question-circle'} me-1"></i>${req.type === 'complaint' ? t('complaint') : t('request')}</div>
+              </div>
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">${t('priority')}</div>
+                <div style="font-weight:600;"><i class="fas fa-flag me-1"></i>${t(req.priority)}</div>
+              </div>
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">${t('category')}</div>
+                <div style="font-weight:600;"><i class="fas ${getRequestIcon(req.category)} me-1"></i>${t(req.category === 'training' ? 'trainingCat' : req.category)}</div>
+              </div>
+            </div>
+            <div class="mb-2"><strong>${t('title')}:</strong> ${req.title}</div>
+            <div class="mb-2"><strong>${t('from')}:</strong> ${user?.fullName || 'â€”'} (${user?.email || 'â€”'})</div>
+            <div class="mb-2"><strong>${t('assignedTo')}:</strong> ${assignee ? assignee.fullName : 'â€”'}</div>
+            <div><strong>${t('createdAt')}:</strong> ${fmtDate(req.createdAt)}</div>
+          </div>
+          
+          <div class="mb-3">
+            <strong>${t('description')}:</strong>
+            <p style="margin-top:6px;color:var(--text-secondary);padding:12px;background:rgba(0,0,0,0.1);border-radius:8px;">${req.description}</p>
+          </div>
+          
+          ${req.attachments && req.attachments.length ? `<div class="mb-3"><strong>${t('attachments')}:</strong><div style="margin-top:6px;">${req.attachments.map(a => `<span class="chip"><i class="fas fa-paperclip me-1"></i>${a}</span>`).join('')}</div></div>` : ''}
+          
+          <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-neon" onclick="RecLise.closeModal()">${t('close')}</button>
+          </div>
+        `;
+        showModal(content, true);
+      }
+
+      function showResolveEscalatedModal(id) {
+        const req = data.requests.find(r => r.id === id);
+        if (!req) return;
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3><i class="fas fa-check-circle me-2"></i>${t('resolve')} â€” #${req.id}</h3>
+          
+          <!-- Request Summary -->
+          <div class="glass-card mb-3" style="padding:16px;border-left:4px solid var(--warning);">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h5 style="margin:0;"><i class="fas fa-info-circle me-2"></i>${t('title')}</h5>
+              <span class="status-pill status-escalated">${t('escalated')}</span>
+            </div>
+            <div style="font-size:1rem;margin-bottom:8px;">${req.title}</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);">
+              <span>${t('type')}: <i class="fas ${req.type === 'complaint' ? 'fa-exclamation-triangle' : 'fa-question-circle'} me-1"></i>${req.type === 'complaint' ? t('complaint') : t('request')}</span>
+              <span class="mx-2">|</span>
+              <span>${t('priority')}: <i class="fas fa-flag me-1"></i>${t(req.priority)}</span>
+            </div>
+          </div>
+          
+          <!-- Resolution Form -->
+          <div class="glass-card mb-3" style="padding:16px;">
+            <h5 style="margin-bottom:14px;"><i class="fas fa-clipboard-check me-2"></i>${t('finalResponse')}</h5>
+
+            <div class="mb-3">
+              <label class="form-label">${t('finalResponse')}</label>
+              <textarea class="form-control" id="closeResponse" rows="3" placeholder="${t('writeReplyPlaceholder')}"></textarea>
+            </div>
+          </div>
+          
+          <button class="btn btn-neon w-100" onclick="RecLise.resolveEscalated(${id})"><i class="fas fa-check me-2"></i>${t('resolve')}</button>
+        `;
+        showModal(content);
+      }
+
+      function resolveEscalated(id) {
+        const req = data.requests.find(r => r.id === id);
+        if (!req) return;
+        const response = document.getElementById('closeResponse').value.trim();
+        req.status = 'resolved';
+        req.updatedAt = new Date().toISOString();
+        req.supportResponse = response || 'Resolved';
+        const replyText = response || 'Request resolved.';
+        req.messages.push({ from: 'admin', text: replyText, time: new Date().toISOString() });
+        saveData();
+        addAuditLog('RESOLVE', 'Escalated request #' + id + ' resolved.');
+        showToast(t('requestResolved'), 'success');
+        closeModal();
+        renderContent('escalated-requests');
+      }
+
+      function renderCorrespondences(container) {
+        var allUsers = data.users || [];
+        var html = '<div class="section-header"><h2>' + t('correspondences') + '</h2><button class="btn btn-neon btn-sm" onclick="RecLise.showAddCorrespondenceModal()"><i class="fas fa-plus me-1"></i>' + t('addTemplate') + '</button></div>';
+        html += '<div class="glass-card overflow-auto"><table class="table-glass"><thead><tr><th>' + t('id') + '</th><th>' + t('templateName') + '</th><th>' + t('templateType') + '</th><th>' + t('reassignTo') + '</th><th>' + t('fileModelTemplate') + '</th><th>' + t('actions') + '</th></tr></thead><tbody>';
+        data.correspondences.forEach(function(c) {
+          var userOptions = '<option value="">' + t('all') + '</option>';
+          allUsers.forEach(function(u) {
+            userOptions += '<option value="' + u.id + '" ' + (c.assignee === u.id ? 'selected' : '') + '>' + u.fullName + '</option>';
+          });
+          html += '<tr>';
+          html += '<td>#' + c.id + '</td>';
+          html += '<td>' + c.name + '</td>';
+          html += '<td>' + c.type + '</td>';
+          html += '<td><select class="form-select form-select-sm" id="reassign_' + c.id + '" style="min-width:140px;padding:6px 10px;font-size:0.82rem;">' + userOptions + '</select></td>';
+          html += '<td><textarea class="form-control form-control-sm" id="template_' + c.id + '" rows="2" style="min-width:180px;padding:6px 10px;font-size:0.82rem;">' + (c.template || '') + '</textarea></td>';
+          html += '<td>';
+          html += '<button class="btn btn-sm btn-neon" style="margin-right:4px;margin-bottom:4px;" onclick="RecLise.saveCorrespondenceReassign(' + c.id + ')"><i class="fas fa-exchange-alt"></i> ' + t('saveReassignment') + '</button>';
+          html += '<button class="btn btn-sm btn-neon" style="margin-right:4px;margin-bottom:4px;" onclick="RecLise.saveCorrespondenceTemplate(' + c.id + ')"><i class="fas fa-save"></i> ' + t('saveTemplate') + '</button>';
+          html += '<button class="btn btn-sm btn-danger" onclick="RecLise.deleteCorrespondence(' + c.id + ')"><i class="fas fa-trash"></i></button>';
+          html += '</td></tr>';
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+      }
+
+      function showAddCorrespondenceModal() {
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3>${t('addTemplate')}</h3>
+          <div class="mb-3"><label class="form-label">${t('templateName')}</label><input class="form-control" id="cName" required></div>
+          <div class="mb-3">
+            <label class="form-label">${t('templateType')}</label>
+            <select class="form-select" id="cType"><option value="Interne">${t('internal')}</option><option value="Externe">${t('external')}</option></select>
+          </div>
+          <button class="btn btn-neon" onclick="RecLise.addCorrespondence()">${t('save')}</button>
+        `;
+        showModal(content);
+      }
+
+      function addCorrespondence() {
+        const name = document.getElementById('cName').value.trim();
+        if (!name) return showToast(t('fillRequiredFields'), 'error');
+        data.correspondences.push({ id: nextId(data.correspondences), name, type: document.getElementById('cType').value, template: '' });
+        saveData();
+        addAuditLog('ADD_CORRESPONDENCE', `Correspondence template added: ${name}`);
+        showToast(t('save') + ' âœ“', 'success');
+        closeModal();
+        renderContent('correspondences');
+      }
+
+      function deleteCorrespondence(id) {
+        showConfirmModal(() => {
+          data.correspondences = data.correspondences.filter(c => c.id !== id);
+          saveData();
+          addAuditLog('DELETE_CORRESPONDENCE', `Correspondence #${id} deleted`);
+          showToast(t('delete') + ' âœ“', 'info');
+          renderContent('correspondences');
+        });
+      }
+
+      function saveCorrespondenceReassign(id) {
+        var sel = document.getElementById('reassign_' + id);
+        if (!sel) return;
+        var userId = sel.value ? parseInt(sel.value) : null;
+        var corr = (data.correspondences || []).find(function(c) { return c.id === id; });
+        if (!corr) return;
+        corr.assignee = userId;
+        var assigneeName = userId ? (data.users.find(function(u) { return u.id === userId; }) || {}).fullName || 'Unknown' : t('all');
+        saveData();
+        addAuditLog('CORRESPONDENCE_REASSIGN', 'Correspondence #' + id + ' reassigned to ' + assigneeName);
+        showToast(t('saveReassignment') + ' âœ“', 'success');
+      }
+
+      function saveCorrespondenceTemplate(id) {
+        var ta = document.getElementById('template_' + id);
+        if (!ta) return;
+        var corr = (data.correspondences || []).find(function(c) { return c.id === id; });
+        if (!corr) return;
+        corr.template = ta.value;
+        saveData();
+        addAuditLog('CORRESPONDENCE_TEMPLATE_SAVE', 'Template saved for correspondence #' + id);
+        showToast(t('saveTemplate') + ' âœ“', 'success');
+      }
+
+      function renderReferentials(container) {
+        const refs = data.references;
+        container.innerHTML = `
+          <div class="section-header"><h2>${t('referentials')}</h2></div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="glass-card">
+                <h5 class="margin-bottom-16">${t('subTasks')}</h5>
+                <div id="subTasksChips" class="margin-bottom-12">
+                  ${(refs.subTasks || []).map((s, i) => `<span class="chip">${s}<i class="fas fa-times chip-remove" onclick="RecLise.removeRef('subTasks',${i})"></i></span>`).join('')}
+                </div>
+                <div class="flex-gap-8">
+                  <input class="form-control" id="newSubTask" placeholder="${t('addItem')}..." style="flex:1;">
+                  <button class="btn btn-neon btn-sm" onclick="RecLise.addRef('subTasks')">${t('addItem')}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function addRef(type) {
+        const inputId = type === 'subTasks' ? 'newSubTask' : 'newClosureMotive';
+        const val = document.getElementById(inputId).value.trim();
+        if (!val) return;
+        if (!data.references[type]) data.references[type] = [];
+        data.references[type].push(val);
+        saveData();
+        addAuditLog('ADD_REFERENTIAL', `Added ${type}: ${val}`);
+        showToast(t('save') + ' âœ“', 'success');
+        renderContent('referentials');
+      }
+
+      function removeRef(type, index) {
+        if (!data.references[type]) return;
+        const removed = data.references[type].splice(index, 1);
+        saveData();
+        addAuditLog('DELETE_REFERENTIAL', `Removed ${type}: ${removed[0]}`);
+        renderContent('referentials');
+      }
+
+      function renderDistributionBoxes(container) {
+        container.innerHTML = `
+          <div class="section-header">
+            <h2>${t('distributionBoxes')}</h2>
+            <button class="btn btn-neon btn-sm" onclick="RecLise.showAddBoxModal()"><i class="fas fa-plus me-1"></i>${t('addItem')}</button>
+          </div>
+          <div class="row g-3">
+            ${data.distributionBoxes.map(box => `
+              <div class="col-md-4">
+                <div class="glass-card">
+                  <div class="flex-space-between align-items-center margin-bottom-12">
+                    <h5 class="margin-0"><i class="fas fa-box me-2" style="color:var(--icon-color)"></i>${box.name}</h5>
+                    <button class="btn btn-sm btn-danger" onclick="RecLise.deleteBox(${box.id})"><i class="fas fa-trash"></i></button>
+                  </div>
+                  <div><strong>${t('members')}:</strong></div>
+                  <ul style="margin:8px 0 0;padding-left:20px;color:var(--text-secondary);">
+                    ${box.members.map(m => `<li>${m}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function showAddBoxModal() {
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3>${t('addItem')} â€” ${t('distributionBoxes')}</h3>
+          <div class="mb-3"><label class="form-label">${t('boxName')}</label><input class="form-control" id="boxName" required></div>
+          <div class="mb-3"><label class="form-label">${t('members')} (comma separated)</label><input class="form-control" id="boxMembers"></div>
+          <button class="btn btn-neon" onclick="RecLise.addBox()">${t('save')}</button>
+        `;
+        showModal(content);
+      }
+
+      function addBox() {
+        const name = document.getElementById('boxName').value.trim();
+        if (!name) return;
+        const members = document.getElementById('boxMembers').value.split(',').map(m => m.trim()).filter(Boolean);
+        data.distributionBoxes.push({ id: nextId(data.distributionBoxes), name, members });
+        saveData();
+        addAuditLog('ADD_BOX', `Distribution box added: ${name}`);
+        showToast(t('save') + ' âœ“', 'success');
+        closeModal();
+        renderContent('distribution-boxes');
+      }
+
+      function deleteBox(id) {
+        showConfirmModal(() => {
+          data.distributionBoxes = data.distributionBoxes.filter(b => b.id !== id);
+          saveData();
+          addAuditLog('DELETE_BOX', `Distribution box #${id} deleted`);
+          showToast(t('delete') + ' âœ“', 'info');
+          renderContent('distribution-boxes');
+        });
+      }
+
+      function renderTechnicalProblems(container) {
+        var issues = data.technicalIssues || [];
+        var html = '<div class="section-header"><h2>' + t('technicalProblems') + '</h2><button class="btn btn-neon btn-sm" onclick="RecLise.showAddIssueModal()"><i class="fas fa-plus me-1"></i>' + t('addIssue') + '</button></div>';
+        html += '<div class="glass-card overflow-auto"><table class="table-glass"><thead><tr><th>' + t('id') + '</th><th>' + t('issueDescription') + '</th><th>' + t('status') + '</th><th>' + t('date') + '</th><th>' + t('actions') + '</th></tr></thead><tbody>';
+        if (issues.length === 0) {
+          html += '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary);">' + t('noResults') + '</td></tr>';
+        } else {
+          issues.forEach(function(issue) {
+            var statusClass = issue.status === 'resolved' ? 'status-resolved' : 'status-new';
+            html += '<tr><td>#' + issue.id + '</td><td>' + issue.description + '</td><td><span class="status-pill ' + statusClass + '">' + (issue.status === 'resolved' ? t('resolved') : t('active')) + '</span></td><td>' + fmtDate(issue.createdAt) + '</td><td>';
+            if (issue.status !== 'resolved') {
+              html += '<button class="btn btn-sm btn-neon" style="margin-right:4px;" onclick="RecLise.resolveIssue(' + issue.id + ')"><i class="fas fa-check"></i> ' + t('resolve') + '</button>';
+            }
+            html += '<button class="btn btn-sm btn-danger" onclick="RecLise.deleteIssue(' + issue.id + ')"><i class="fas fa-trash"></i></button></td></tr>';
+          });
+        }
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+      }
+
+      function showAddIssueModal() {
+        var content = '<button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>';
+        content += '<h3>' + t('addIssue') + '</h3>';
+        content += '<div class="mb-3"><label class="form-label">' + t('issueDescription') + '</label><textarea class="form-control" id="issueDesc" rows="4" required></textarea></div>';
+        content += '<button class="btn btn-neon" onclick="RecLise.addIssue()">' + t('save') + '</button>';
+        showModal(content);
+      }
+
+      function addIssue() {
+        var desc = document.getElementById('issueDesc').value.trim();
+        if (!desc) return showToast(t('fillRequiredFields'), 'error');
+        data.technicalIssues.push({ id: nextId(data.technicalIssues), description: desc, status: 'open', createdAt: new Date().toISOString() });
+        saveData();
+        addAuditLog('CREATE_TECHNICAL_ISSUE', 'Technical issue added: ' + desc.substring(0, 50));
+        showToast(t('save') + ' âœ“', 'success');
+        closeModal();
+        renderContent('technical-problems');
+      }
+
+      function resolveIssue(id) {
+        var issue = (data.technicalIssues || []).find(function(i) { return i.id === id; });
+        if (!issue) return;
+        issue.status = 'resolved';
+        issue.resolvedAt = new Date().toISOString();
+        saveData();
+        addAuditLog('RESOLVE_TECHNICAL_ISSUE', 'Technical issue #' + id + ' resolved');
+        showToast(t('resolved') + ' âœ“', 'success');
+        renderContent('technical-problems');
+      }
+
+      function deleteIssue(id) {
+        showConfirmModal(function() {
+          data.technicalIssues = (data.technicalIssues || []).filter(function(i) { return i.id !== id; });
+          saveData();
+          addAuditLog('DELETE_TECHNICAL_ISSUE', 'Technical issue #' + id + ' deleted');
+          showToast(t('delete') + ' âœ“', 'info');
+          renderContent('technical-problems');
+        });
+      }
+
+      function renderCommonCustomization(container) {
+        var cw = data.customWidgets || { requests: true, users: true, stats: true, activity: true };
+        var wf = data.workflow || '';
+        var html = '<div class="section-header"><h2>' + t('commonCustomization') + '</h2></div>';
+        html += '<div class="row g-3">';
+        html += '<div class="col-md-6"><div class="glass-card"><h5 class="margin-bottom-20"><i class="fas fa-th-large me-2" style="color:var(--icon-color)"></i>' + t('dashboardWidgets') + '</h5>';
+        html += '<div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="cwRequests" ' + (cw.requests ? 'checked' : '') + '><label class="form-check-label" for="cwRequests">' + t('widgetRequests') + '</label></div>';
+        html += '<div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="cwUsers" ' + (cw.users ? 'checked' : '') + '><label class="form-check-label" for="cwUsers">' + t('widgetUsers') + '</label></div>';
+        html += '<div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="cwStats" ' + (cw.stats ? 'checked' : '') + '><label class="form-check-label" for="cwStats">' + t('widgetStats') + '</label></div>';
+        html += '<div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="cwActivity" ' + (cw.activity ? 'checked' : '') + '><label class="form-check-label" for="cwActivity">' + t('widgetActivity') + '</label></div>';
+        html += '<button class="btn btn-neon btn-sm margin-top-20" onclick="RecLise.saveWidgetCustomization()"><i class="fas fa-save me-1"></i>' + t('save') + '</button>';
+        html += '</div></div>';
+        html += '<div class="col-md-6"><div class="glass-card"><h5 class="margin-bottom-20"><i class="fas fa-route me-2" style="color:var(--icon-color)"></i>' + t('workflow') + '</h5>';
+        html += '<div class="mb-3"><label class="form-label">' + t('customizeWorkflow') + '</label><select class="form-select" id="workflowSelect">';
+        html += '<option value="">' + t('all') + '</option>';
+        (data.references.subTasks || []).forEach(function(st) {
+          html += '<option value="' + st + '" ' + (wf === st ? 'selected' : '') + '>' + st + '</option>';
+        });
+        html += '</select></div>';
+        html += '<button class="btn btn-neon btn-sm margin-top-20" onclick="RecLise.saveWorkflowCustomization()"><i class="fas fa-save me-1"></i>' + t('save') + '</button>';
+        html += '</div></div></div>';
+        container.innerHTML = html;
+      }
+
+      function saveWidgetCustomization() {
+        data.customWidgets = {
+          requests: document.getElementById('cwRequests').checked,
+          users: document.getElementById('cwUsers').checked,
+          stats: document.getElementById('cwStats').checked,
+          activity: document.getElementById('cwActivity').checked
+        };
+        saveData();
+        addAuditLog('CUSTOMIZE_WIDGETS', 'Dashboard widgets customized');
+        showToast(t('settingsSaved'), 'success');
+      }
+
+      function saveWorkflowCustomization() {
+        data.workflow = document.getElementById('workflowSelect').value;
+        saveData();
+        addAuditLog('CUSTOMIZE_WORKFLOW', 'Workflow set to: ' + (data.workflow || t('all')));
+        showToast(t('settingsSaved'), 'success');
+      }
+
+      function renderStatistics(container) {
+        const reqs = data.requests;
+        const total = reqs.length;
+        const byType = { request: 0, complaint: 0 };
+        reqs.forEach(r => { byType[r.type] = (byType[r.type] || 0) + 1; });
+        const byCat = { technical: 0, access: 0, training: 0 };
+        reqs.forEach(r => { byCat[r.category] = (byCat[r.category] || 0) + 1; });
+        const byDept = {};
+        reqs.forEach(r => {
+          const user = getUserById(r.userId);
+          const dept = user ? user.dept : 'Unknown';
+          byDept[dept] = (byDept[dept] || 0) + 1;
+        });
+
+        function progressBar(label, value, max, color) {
+          const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+          return `
+            <div class="margin-bottom-14">
+              <div class="flex-space-between font-size-0-88 margin-bottom-4">
+                <span>${label}</span><span>${value} (${pct}%)</span>
+              </div>
+              <div class="progress-custom"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div>
+            </div>
+          `;
+        }
+
+        container.innerHTML = `
+          <div class="section-header"><h2>${t('statistics')}</h2></div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="glass-card">
+                <h5 class="margin-bottom-16">${t('requestsByType')}</h5>
+                ${progressBar(t('request'), byType.request, total, '#3B82F6')}
+                ${progressBar(t('complaint'), byType.complaint, total, '#EF4444')}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="glass-card">
+                <h5 class="margin-bottom-16">${t('requestsByCategory')}</h5>
+                ${progressBar(t('technical'), byCat.technical, total, '#F59E0B')}
+                ${progressBar(t('access'), byCat.access, total, '#10B981')}
+                ${progressBar(t('trainingCat'), byCat.training, total, '#8B5CF6')}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="glass-card">
+                <h5 class="margin-bottom-16">${t('requestsByDept')}</h5>
+                ${Object.entries(byDept).map(([dept, count]) => progressBar(dept, count, total, '#025C84')).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAuditLogs(container) {
+        const logs = [...data.auditLogs].reverse();
+        container.innerHTML = `
+          <div class="section-header"><h2>${t('auditLogs')}</h2></div>
+          <div class="glass-card overflow-auto">
+            <table class="table-glass">
+              <thead><tr><th>${t('id')}</th><th>${t('action')}</th><th>${t('userId')}</th><th>${t('details')}</th><th>${t('timestamp')}</th></tr></thead>
+              <tbody>
+                ${logs.map(log => {
+          const user = getUserById(log.userId);
+          return `
+                    <tr>
+                      <td>#${log.id}</td>
+                      <td><span class="status-action">${log.action}</span></td>
+                      <td>${user ? user.fullName : 'System'}</td>
+                      <td>${log.details}</td>
+                      <td>${fmtDate(log.timestamp)}</td>
+                    </tr>
+                  `;
+        }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      function renderSystemSettings(container) {
+        container.innerHTML = `
+          <div class="section-header"><h2>${t('systemSettings')}</h2></div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="glass-card">
+                <h5 class="margin-bottom-20"><i class="fas fa-bell me-2" style="color:var(--icon-color)"></i>${t('emailNotifications')}</h5>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="settEmailNotif" checked>
+                  <label class="form-check-label" for="settEmailNotif">${t('emailNotifications')}</label>
+                </div>
+                <p class="font-size-0-82 text-secondary font-style-italic">${t('settingsNote')}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="glass-card">
+                <h5 class="margin-bottom-20"><i class="fas fa-clock me-2" style="color:var(--icon-color)"></i>${t('sessionTimeout')}</h5>
+                <div class="mb-3">
+                  <label class="form-label">${t('sessionTimeout')} (${t('minutes')})</label>
+                  <input type="number" class="form-control" id="settTimeout" value="30" min="5" max="120">
+                </div>
+                <p class="font-size-0-82 text-secondary font-style-italic">${t('settingsNote')}</p>
+              </div>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-neon" onclick="RecLise.showToast(RecLise.t('settingsSaved'), 'success')"><i class="fas fa-save me-2"></i>${t('save')}</button>
+            </div>
+          </div>
+        `;
+      }
+
+      function showConfirmModal(onConfirm) {
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3>${t('confirmDelete')}</h3>
+          <p class="text-secondary">${t('confirmDeleteMsg')}</p>
+          <div class="d-flex gap-2 margin-top-20">
+            <button class="btn btn-neon" id="confirmYes">${t('yes')}</button>
+            <button class="btn btn-outline-neon" onclick="RecLise.closeModal()">${t('no')}</button>
+          </div>
+        `;
+        showModal(content);
+        document.getElementById('confirmYes').addEventListener('click', () => { closeModal(); onConfirm(); });
+      }
+
+      function initBackgroundAnimation() {
+        const cvs = document.getElementById('particleCanvas');
+        if (!cvs) return;
+        const pctx = cvs.getContext('2d');
+        let pts = [], W, H;
+
+        function resize() {
+          W = cvs.width = window.innerWidth;
+          H = cvs.height = window.innerHeight;
+        }
+
+        resize();
+        window.addEventListener('resize', () => { resize(); initPts(); });
+
+        class Pt {
+          constructor() { this.reset(); }
+          reset() {
+            this.x = Math.random() * W;
+            this.y = Math.random() * H;
+            this.vx = (Math.random() - .5) * .48;
+            this.vy = (Math.random() - .5) * .48;
+            this.r = Math.random() * 1.8 + 0.6;
+          }
+          step() {
+            this.x += this.vx; this.y += this.vy;
+            if (this.x < 0 || this.x > W) this.vx *= -1;
+            if (this.y < 0 || this.y > H) this.vy *= -1;
+          }
+          draw() {
+            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            pctx.beginPath(); pctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            const color = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(2, 92, 132, 0.9)';
+            pctx.fillStyle = color;
+            pctx.shadowBlur = 10;
+            pctx.shadowColor = isDark ? '#FFFFFF' : '#025C84';
+            pctx.fill();
+            pctx.shadowBlur = 0;
+          }
+        }
+
+        function initPts() {
+          pts = [];
+          const n = Math.min(Math.floor(W * H / 8000), 130);
+          for (let i = 0; i < n; i++) pts.push(new Pt());
+        }
+
+        initPts();
+
+        const LDIST = 155;
+        function drawLinks() {
+          const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+          const base = isDark ? '255, 255, 255,' : '2, 92, 132,';
+          for (let i = 0; i < pts.length; i++) {
+            for (let j = i + 1; j < pts.length; j++) {
+              const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx * dx + dy * dy);
+              if (d < LDIST) {
+                pctx.beginPath(); pctx.moveTo(pts[i].x, pts[i].y); pctx.lineTo(pts[j].x, pts[j].y);
+                pctx.strokeStyle = `rgba(${base}${(1 - d / LDIST) * 0.45})`;
+                pctx.lineWidth = 0.8; pctx.stroke();
+              }
+            }
+          }
+        }
+
+        function loop() {
+          pctx.clearRect(0, 0, W, H);
+          pts.forEach(p => { p.step(); p.draw(); });
+          drawLinks();
+          requestAnimationFrame(loop);
+        }
+        loop();
+      }
+
+      function init() {
+        loadData();
+        state.currentUser = { id: 3, email: 'admin@mesrs.tn', fullName: 'Kamel Fathallah', role: 'admin', avatar: 'KF' };
+        document.getElementById('appShell').style.display = 'block';
+        document.querySelectorAll('.lang-item').forEach(item => {
+          item.classList.toggle('active', item.dataset.lang === state.lang);
+        });
+        document.documentElement.setAttribute('lang', 'ar');
+        if (state.lang === 'ar') document.body.classList.add('rtl');
+        document.documentElement.setAttribute('data-bs-theme', state.theme);
+        document.querySelectorAll('#themeIcon, #themeIconLogin').forEach(i => i.className = state.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun');
+        initBackgroundAnimation();
+        renderSidebar();
+        renderContent('referentials');
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+      return {
+        navigate,
+        handleLogout,
+        toggleTheme,
+        setLanguage,
+        toggleLangMenu,
+        toggleSidebar,
+        showToast,
+        closeModal,
+        t,
+        showAddUserModal,
+        addUser,
+        filterUsers,
+        getUserRows,
+        showEditUserModal,
+        updateUser,
+        deleteUser,
+        showResetPasswordModal,
+        resetPassword,
+        showDelegateModal,
+        delegateRole,
+        viewRequestDetail,
+        showResolveEscalatedModal,
+        resolveEscalated,
+        showAddCorrespondenceModal,
+        addCorrespondence,
+        deleteCorrespondence,
+        saveCorrespondenceReassign,
+        saveCorrespondenceTemplate,
+        addRef,
+        removeRef,
+        showAddBoxModal,
+        addBox,
+        deleteBox,
+        renderTechnicalProblems,
+        showAddIssueModal,
+        addIssue,
+        resolveIssue,
+        deleteIssue,
+        renderCommonCustomization,
+        saveWidgetCustomization,
+        saveWorkflowCustomization
+      };
+
+    })();
+  </script>
+</body>
+
+</html>
+

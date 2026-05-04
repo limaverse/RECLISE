@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RecLise - Connexion - ELISSA Support Platform.">
+  <title>RecLise — Connexion</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Cairo:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-dark: #0A0F1C;
+      --primary-light: #F5F8FA;
+      --brand-accent: #ffffff;
+      --neon-accent: #ffffff;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --info: #ffffff;
+      --icon-color: #E2E0FF;
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text-primary: #E8ECF1;
+      --text-secondary: #94A3B8;
+      --body-bg: #0A0F1C;
+      --card-bg: rgba(255, 255, 255, 0.07);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --input-bg: rgba(255, 255, 255, 0.08);
+      --input-border: rgba(255, 255, 255, 0.15);
+      --input-text: #E8ECF1;
+      --modal-bg: rgba(15, 20, 40, 0.95);
+      --shadow-glow: 0 0 15px rgba(255, 255, 255, 0.1);
+      --table-hover: rgba(255, 255, 255, 0.05);
+      --toast-bg: rgba(15, 20, 40, 0.92);
+      --focus-glow: rgba(255, 255, 255, 0.25);
+      --focus-border: #ffffff;
+      --brand-accent-rgb: 255, 255, 255;
+      --btn-bg: #ffffff;
+      --btn-text: #0A0F1C;
+      --btn-border: #ffffff;
+      --btn-hover-bg: transparent;
+      --btn-hover-text: #025C84;
+    }
+
+    [data-bs-theme="light"] {
+      --brand-accent: #025C84;
+      --neon-accent: #025C84;
+      --brand-accent-rgb: 2, 92, 132;
+      --info: #025C84;
+      --icon-color: #025C84;
+      --body-bg: #E2E0FF;
+      --glass-bg: rgba(226, 224, 255, 0.6);
+      --glass-border: rgba(2, 92, 132, 0.08);
+      --text-primary: #1E293B;
+      --text-secondary: #64748B;
+      --card-bg: rgba(226, 224, 255, 0.6);
+      --card-border: rgba(2, 92, 132, 0.08);
+      --input-bg: rgba(226, 224, 255, 0.8);
+      --input-border: rgba(2, 92, 132, 0.15);
+      --input-text: #1E293B;
+      --modal-bg: rgba(226, 224, 255, 0.95);
+      --shadow-glow: 0 0 15px rgba(2, 92, 132, 0.15);
+      --table-hover: rgba(2, 92, 132, 0.03);
+      --toast-bg: rgba(226, 224, 255, 0.92);
+      --focus-glow: rgba(2, 92, 132, 0.2);
+      --focus-border: #025C84;
+      --btn-bg: #025C84;
+      --btn-text: #ffffff;
+      --btn-border: #025C84;
+      --btn-hover-bg: transparent;
+      --btn-hover-text: #025C84;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      background: var(--body-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background 0.4s ease, color 0.3s ease;
+    }
+
+    body.rtl {
+      direction: rtl;
+      text-align: right;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    a {
+      color: var(--neon-accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--brand-accent);
+      opacity: 0.8;
+    }
+
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    #loginPage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .login-box {
+      background: var(--card-bg);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 48px 36px;
+      text-align: center;
+    }
+
+    .login-box .logo-image {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 150px;
+    }
+
+    [data-bs-theme="dark"] .login-box .logo-image {
+      filter: brightness(0) invert(1);
+    }
+
+    .login-box h2 {
+      font-size: 2rem;
+      margin-bottom: 6px;
+    }
+
+    .login-actions { display: flex; justify-content: center; gap: 12px; }
+.login-box .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      margin-bottom: 30px;
+    }
+
+    .form-control,
+    .form-select {
+      background: var(--input-bg) !important;
+      border: 1px solid var(--input-border) !important;
+      color: var(--input-text) !important;
+      border-radius: 12px !important;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--focus-border) !important;
+      box-shadow: 0 0 0 3px var(--focus-glow) !important;
+      outline: none;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .form-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    .btn-neon {
+      background: var(--btn-bg);
+      color: var(--btn-text) !important;
+      border: 1px solid var(--btn-border);
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .btn-neon:hover {
+      background: var(--btn-hover-bg);
+      box-shadow: 0 0 20px rgba(var(--brand-accent-rgb), 0.3);
+      transform: translateY(-1px);
+      color: var(--btn-hover-text) !important;
+    }
+
+    .btn-outline-neon {
+      background: transparent;
+      border: 1px solid var(--neon-accent);
+      color: var(--neon-accent);
+      border-radius: 10px;
+      padding: 8px 20px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .btn-outline-neon:hover {
+      background: var(--focus-glow);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-icon:hover {
+      color: var(--neon-accent);
+      border-color: rgba(var(--brand-accent-rgb), 0.3);
+    }
+
+    .dropdown-menu {
+      background: var(--modal-bg);
+      border: 1px solid var(--glass-border);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .dropdown-item {
+      color: var(--text-primary);
+    }
+
+    .dropdown-item:hover {
+      background: rgba(var(--brand-accent-rgb), 0.1);
+      color: var(--neon-accent);
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1090;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    body.rtl .toast-container {
+      right: auto;
+      left: 24px;
+    }
+
+    .toast-msg {
+      background: var(--toast-bg);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideUp 0.3s ease;
+      min-width: 280px;
+      max-width: 400px;
+    }
+
+    .toast-msg.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .toast-msg.error {
+      border-left: 3px solid var(--danger);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 575px) {
+      .login-box {
+        padding: 32px 24px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(var(--brand-accent-rgb), 0.2);
+      border-radius: 3px;
+    }
+
+    i[class*="fa-"] {
+      color: var(--icon-color);
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="particleCanvas"></canvas>
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div id="loginPage">
+    <div class="login-container">
+      <div class="login-box">
+        <img src="C:/Users/wassi/OneDrive/Desktop/logo/Untitled-1.png" alt="Logo" class="logo-image" />
+        <p class="subtitle" id="loginSubtitle">Bienvenue — ELISSA Support Platform — MESRS</p>
+        <form id="loginForm" autocomplete="off">
+          <div class="mb-3 text-start">
+            <label class="form-label" id="lblUsername">Nom d'utilisateur</label>
+            <input type="text" class="form-control" id="inputUsername" placeholder="admin@mesrs.tn" required>
+          </div>
+          <div class="mb-3 text-start">
+            <label class="form-label" id="lblPassword">Mot de passe</label>
+            <input type="password" class="form-control" id="inputPassword" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-neon w-100" id="btnAuthenticate">
+            <i class="fas fa-fingerprint me-2"></i><span>Authentifier</span>
+          </button>
+        </form>
+        <div class="mt-3 login-actions">
+          <div class="dropdown">
+            <button class="btn-icon" id="loginLangBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Changer la langue"><i
+                class="fas fa-globe"></i></button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" onclick="setLanguage('fr')">Français</a></li>
+              <li><a class="dropdown-item" href="#" onclick="setLanguage('en')">English</a></li>
+              <li><a class="dropdown-item" href="#" onclick="setLanguage('ar')">العربية</a></li>
+            </ul>
+          </div>
+          <button class="btn-icon" onclick="toggleTheme()" title="Basculer le thème"><i class="fas fa-moon" id="themeIconLogin"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // No persistent login state; static redirect-only behavior.
+    const i18n = {
+      fr: { loginSubtitle: 'Bienvenue — ELISSA Support Platform — MESRS', lblUsername: "Nom d'utilisateur", lblPassword: 'Mot de passe', btnAuthenticate: 'Authentifier', errorLogin: 'Identifiants incorrects' },
+      en: { loginSubtitle: 'Welcome — ELISSA Support Platform — MESRS', lblUsername: 'Username', lblPassword: 'Password', btnAuthenticate: 'Authenticate', errorLogin: 'Invalid credentials' },
+      ar: { loginSubtitle: 'مرحبًا — منصة دعم إليسا — MESRS', lblUsername: 'اسم المستخدم', lblPassword: 'كلمة المرور', btnAuthenticate: 'مصادقة', errorLogin: 'بيانات غير صحيحة' }
+    };
+    let lang = 'fr';
+    let theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    const users = [
+      { id: 1, email: 'user@mesrs.tn', fullName: 'Ahmed Ben Ali', role: 'user' },
+      { id: 2, email: 'support@mesrs.tn', fullName: 'Sarra Mansour', role: 'support' },
+      { id: 3, email: 'admin@mesrs.tn', fullName: 'Kamel Fathallah', role: 'admin' }
+    ];
+
+    function t(key) { return (i18n[lang] && i18n[lang][key]) || (i18n.en[key]) || key; }
+
+    function toggleTheme() {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-bs-theme', theme);
+      document.getElementById('themeIconLogin').className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    }
+
+    function setLanguage(l) {
+      lang = l;
+      document.documentElement.setAttribute('lang', l);
+      if (l === 'ar') document.body.classList.add('rtl'); else document.body.classList.remove('rtl');
+      document.getElementById('loginSubtitle').textContent = t('loginSubtitle');
+      document.getElementById('lblUsername').textContent = t('lblUsername');
+      document.getElementById('lblPassword').textContent = t('lblPassword');
+      document.getElementById('btnAuthenticate').innerHTML = '<i class="fas fa-fingerprint me-2"></i><span>' + t('btnAuthenticate') + '</span>';
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast-msg ' + type;
+      toast.innerHTML = '<span>' + message + '</span>';
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+    }
+
+    function quickLogin(email) { document.getElementById('inputUsername').value = email; document.getElementById('inputPassword').value = 'demo'; }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('inputUsername').value.toLowerCase();
+      const password = document.getElementById('inputPassword').value;
+      if (!email || !password) { showToast(t('errorLogin'), 'error'); return; }
+      let role = 'user';
+      if (email.includes('admin')) role = 'admin';
+      else if (email.includes('support')) role = 'support';
+      const user = users.find(u => u.role === role) || { id: 0, email, fullName: 'Demo User', role };
+      // No persistent login state is stored; the application remains fully static.
+      showToast('Connexion réussie!', 'success');
+      setTimeout(() => {
+        if (role === 'admin') window.location.href = 'admin_reclise.html';
+        else if (role === 'support') window.location.href = 'support_reclise.html';
+        else window.location.href = 'user_reclise.html';
+      }, 500);
+    }
+
+    function initBackgroundAnimation() {
+      const cvs = document.getElementById('particleCanvas');
+      if (!cvs) return;
+      const pctx = cvs.getContext('2d');
+      let pts = [], W, H;
+      function resize() { W = cvs.width = window.innerWidth; H = cvs.height = window.innerHeight; }
+      resize();
+      window.addEventListener('resize', () => { resize(); initPts(); });
+      class Pt {
+        constructor() { this.reset(); }
+        reset() { this.x = Math.random() * W; this.y = Math.random() * H; this.vx = (Math.random() - .5) * .48; this.vy = (Math.random() - .5) * .48; this.r = Math.random() * 1.8 + 0.6; }
+        step() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > W) this.vx *= -1; if (this.y < 0 || this.y > H) this.vy *= -1; }
+        draw() {
+          const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+          pctx.beginPath();
+          pctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+          pctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(2, 92, 132, 0.9)';
+          pctx.shadowBlur = 10;
+          pctx.shadowColor = isDark ? '#FFFFFF' : '#025C84';
+          pctx.fill();
+          pctx.shadowBlur = 0;
+        }
+      }
+      function initPts() { pts = []; const n = Math.min(Math.floor(W * H / 8000), 130); for (let i = 0; i < n; i++) pts.push(new Pt()); }
+      initPts();
+      const LDIST = 155;
+      function drawLinks() {
+        const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        const base = isDark ? '255, 255, 255,' : '2, 92, 132,';
+        for (let i = 0; i < pts.length; i++) {
+          for (let j = i + 1; j < pts.length; j++) {
+            const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < LDIST) {
+              pctx.beginPath();
+              pctx.moveTo(pts[i].x, pts[i].y);
+              pctx.lineTo(pts[j].x, pts[j].y);
+              pctx.strokeStyle = 'rgba(' + base + (1 - d / LDIST) * 0.45 + ')';
+              pctx.lineWidth = 0.8;
+              pctx.stroke();
+            }
+          }
+        }
+      }
+      function loop() { pctx.clearRect(0, 0, W, H); pts.forEach(p => { p.step(); p.draw(); }); drawLinks(); requestAnimationFrame(loop); }
+      loop();
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.getElementById('themeIconLogin').className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    initBackgroundAnimation();
+  </script>
+</body>
+
+</html>

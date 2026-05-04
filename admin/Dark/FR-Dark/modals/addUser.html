@@ -1,0 +1,17 @@
+﻿<!-- Modal Fragment: addUser | Theme: dark | Lang: fr | Role: admin -->
+<div class="modal-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1060;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div class="modal-box" style="background:var(--modal-bg);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:20px;padding:32px;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;position:relative;">
+    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-secondary);font-size:1.3rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+    <h3 style="margin-bottom:20px;font-family:'Inter',sans-serif;font-weight:800;">Ajouter un utilisateur</h3>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">This modal is loaded as a standalone fragment for <strong>addUser</strong>.</p>
+    <div style="margin-top:20px;display:flex;gap:8px;">
+      <button onclick="this.closest('.modal-overlay').remove()" style="background:var(--btn-bg);color:var(--btn-text);border:1px solid var(--btn-border);border-radius:12px;padding:10px 24px;font-weight:600;cursor:pointer;">Fermer</button>
+    </div>
+  </div>
+</div>
+<script>
+  // This fragment is designed to be loaded via fetch() and injected into a parent page.
+  // It has access to the parent page's RecLise globals (data, state, t(), etc.)
+  console.log('Modal fragment loaded: addUser');
+</script>
+
