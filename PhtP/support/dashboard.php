@@ -98,7 +98,7 @@ $recentRequests = to_camel_all($stmtRecent->fetchAll());
             <div class="activity-dot" style="background:var(--neon-accent)"></div>
             <div>
               <div class="activity-text"><strong>#<?= $r['id'] ?></strong> — <?= htmlspecialchars($r['title']) ?></div>
-              <div class="activity-time"><?= date('M d, H:i', strtotime($r['updatedAt'])) ?></div>
+              <div class="activity-time"><?= $r['updatedAt'] ? date('M d, H:i', strtotime($r['updatedAt'])) : 'N/A' ?></div>
             </div>
           </div>
         <?php endforeach; ?>
@@ -106,15 +106,40 @@ $recentRequests = to_camel_all($stmtRecent->fetchAll());
     </div>
   </div>
 
-  <!-- Quick Actions -->
+  <!-- Quick Actions (Last 3 Visited Pages) -->
   <div class="col-md-6">
     <div class="glass-card" style="padding: 16px;">
       <h5 style="margin-bottom: 16px;"><?php echo t('quickActions'); ?></h5>
-      <div class="d-grid gap-2">
-        <a href="incoming-requests.php" class="btn btn-outline-neon text-start"><i class="fas fa-inbox me-2"></i><?php echo t('incomingRequests'); ?></a>
-        <a href="training.php" class="btn btn-outline-neon text-start"><i class="fas fa-graduation-cap me-2"></i><?php echo t('trainingCat'); ?></a>
-        <a href="analytics.php" class="btn btn-outline-neon text-start"><i class="fas fa-chart-line me-2"></i><?php echo t('analytics'); ?></a>
-      </div>
+      <?php
+      $recentPages = $_SESSION['recent_pages'] ?? [];
+      if (empty($recentPages)):
+      ?>
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p><?php echo t('noResults'); ?></p>
+        </div>
+      <?php else: ?>
+        <div class="d-grid gap-2">
+          <?php
+          $icons = [
+            'dashboard' => 'fa-gauge-high',
+            'incoming-requests' => 'fa-inbox',
+            'messages' => 'fa-comments',
+            'training' => 'fa-graduation-cap',
+            'assist' => 'fa-headset',
+            'analytics' => 'fa-chart-line',
+            'customize-dashboards' => 'fa-palette',
+            'escalation-history' => 'fa-history',
+            'history' => 'fa-clock-rotate-left'
+          ];
+          foreach ($recentPages as $page):
+          ?>
+            <a href="/pfeeeee/PhtP/support/<?= $page ?>.php" class="btn btn-outline-neon text-center">
+              <i class="fas <?= $icons[$page] ?? 'fa-circle' ?> me-2"></i><?php echo t($page); ?>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 </div>

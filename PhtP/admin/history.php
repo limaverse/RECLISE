@@ -39,7 +39,7 @@ $history = to_camel_all($pdo->query("SELECT r.*, u.full_name AS requester_name
             <td><?= htmlspecialchars($req['requester_name'] ?? 'N/A') ?></td>
             <td><?= htmlspecialchars($req['title']) ?></td>
             <td><span class="status-pill status-<?= $req['status'] ?>"><?php echo t('status' . ucfirst($req['status'])); ?></span></td>
-            <td><?= date('Y-m-d', strtotime($req['updated_at'])) ?></td>
+            <td><?= date('Y-m-d', strtotime($req['updatedAt'])) ?></td>
             <td>
               <button class="btn btn-outline-neon btn-sm" onclick="RecLise.viewResolvedRequest(<?= $req['id'] ?>)">
                 <i class="fas fa-eye me-1"></i><?php echo t('view'); ?>

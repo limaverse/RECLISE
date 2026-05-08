@@ -14,7 +14,7 @@ $guides = to_camel_all($pdo->query("SELECT * FROM assist_guides ORDER BY created
 </div>
 
 <?php if (empty($guides)): ?>
-  <p class="text-secondary text-center padding:40px;"><?php echo t('noResults'); ?></p>
+  <p class="text-secondary text-center p-4"><?php echo t('noResults'); ?></p>
 <?php else: ?>
   <div class="row g-3">
     <?php foreach ($guides as $guide): ?>

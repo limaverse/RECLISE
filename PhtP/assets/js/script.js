@@ -5,6 +5,16 @@ const RecLise = (function () {
   function init() {
     const theme = document.documentElement.getAttribute('data-bs-theme') || 'dark';
     
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme) {
+      document.documentElement.setAttribute('data-bs-theme', storedTheme);
+    }
+    
+    // Load notifications
+    fetchNotifications();
+    // Poll every 30 seconds
+    setInterval(fetchNotifications, 30000);
+    
     // Initialize tooltips
     if (typeof bootstrap !== 'undefined') {
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -18,43 +28,44 @@ const RecLise = (function () {
   }
 
   function initBackgroundAnimation() {
-    const cvs = document.getElementById('particleCanvas');
-    if (!cvs) return;
-    const pctx = cvs.getContext('2d');
+    const canvas = document.getElementById('particleCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     let pts = [], W, H;
 
     function resize() {
-      W = cvs.width = window.innerWidth;
-      H = cvs.height = window.innerHeight;
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
     }
 
     resize();
     window.addEventListener('resize', () => { resize(); initPts(); });
 
-    class Pt {
-      constructor() { this.reset(); }
-      reset() {
-        this.x = Math.random() * W;
-        this.y = Math.random() * H;
-        this.vx = (Math.random() - .5) * .48;
-        this.vy = (Math.random() - .5) * .48;
-        this.r = Math.random() * 1.8 + 0.6;
-      }
-      step() {
+    function Pt() {
+      this.x = Math.random() * W;
+      this.y = Math.random() * H;
+      this.vx = (Math.random() - 0.5) * 0.48;
+      this.vy = (Math.random() - 0.5) * 0.48;
+      this.r = Math.random() * 1.8 + 0.6;
+      
+      this.step = function() {
         this.x += this.vx; this.y += this.vy;
         if (this.x < 0 || this.x > W) this.vx *= -1;
         if (this.y < 0 || this.y > H) this.vy *= -1;
-      }
-      draw() {
+      };
+      
+      this.draw = function() {
         const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-        pctx.beginPath(); pctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.beginPath(); 
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
         const color = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(2, 92, 132, 0.9)';
-        pctx.fillStyle = color;
-        pctx.shadowBlur = 10;
-        pctx.shadowColor = isDark ? '#FFFFFF' : '#025C84';
-        pctx.fill();
-        pctx.shadowBlur = 0;
-      }
+        ctx.fillStyle = color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = isDark ? '#FFFFFF' : '#025C84';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      };
     }
 
     function initPts() {
@@ -65,24 +76,27 @@ const RecLise = (function () {
 
     initPts();
 
-    const LDIST = 155;
     function drawLinks() {
       const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
       const base = isDark ? '255, 255, 255,' : '2, 92, 132,';
       for (let i = 0; i < pts.length; i++) {
         for (let j = i + 1; j < pts.length; j++) {
-          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx * dx + dy * dy);
-          if (d < LDIST) {
-            pctx.beginPath(); pctx.moveTo(pts[i].x, pts[i].y); pctx.lineTo(pts[j].x, pts[j].y);
-            pctx.strokeStyle = `rgba(${base}${(1 - d / LDIST) * 0.45})`;
-            pctx.lineWidth = 0.8; pctx.stroke();
+          const dx = pts[i].x - pts[j].x;
+          const dy = pts[i].y - pts[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 155) {
+            ctx.beginPath(); 
+            ctx.moveTo(pts[i].x, pts[i].y); 
+            ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.strokeStyle = 'rgba(' + base + (1 - d / 155) * 0.45 + ')';
+            ctx.lineWidth = 0.8; ctx.stroke();
           }
         }
       }
     }
 
     function loop() {
-      pctx.clearRect(0, 0, W, H);
+      ctx.clearRect(0, 0, W, H);
       pts.forEach(p => { p.step(); p.draw(); });
       drawLinks();
       requestAnimationFrame(loop);
@@ -96,29 +110,105 @@ const RecLise = (function () {
     const current = html.getAttribute('data-bs-theme');
     const next = current === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-bs-theme', next);
-    
+    localStorage.setItem('theme', next);
+
+    // Update icon
     const icon = document.getElementById('themeIcon');
     if (icon) {
       icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     }
-    
+
+    // Update logo
+    const logo = document.getElementById('sidebarLogo');
+    const logoDark = document.getElementById('sidebarLogoDark');
+    if (logo && logoDark) {
+      if (next === 'dark') {
+        logo.style.display = 'none';
+        logoDark.style.display = 'block';
+      } else {
+        logo.style.display = 'block';
+        logoDark.style.display = 'none';
+      }
+    }
+
     // Save preference
-    fetch('ajax/api.php?action=setTheme', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'theme=' + next
-    }).catch(err => console.error('Failed to save theme:', err));
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = window.location.href;
+    form.innerHTML = '<input type="hidden" name="set_theme" value="' + next + '">';
+    document.body.appendChild(form);
+    form.submit();
   }
 
   // Language toggle
   function toggleLangMenu() {
     const menu = document.getElementById('langMenu');
+    if (menu) {
+      menu.classList.toggle('show');
+    }
+  }
+
+  // Notifications toggle
+  function toggleNotifMenu() {
+    const menu = document.getElementById('notifMenu');
     if (menu) menu.classList.toggle('show');
   }
+
+  function fetchNotifications() {
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getNotifications')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          const badge = document.getElementById('notifBadge');
+          if (badge) {
+            badge.style.display = data.unreadCount > 0 ? 'inline-block' : 'none';
+            badge.innerText = data.unreadCount;
+          }
+          const list = document.getElementById('notifList');
+          if (list) {
+            if (data.notifications.length === 0) {
+              list.innerHTML = '<div class="p-3 text-center text-secondary">No notifications</div>';
+            } else {
+              list.innerHTML = data.notifications.map(n => `
+                <div class="p-3 border-bottom" style="background:${n.isRead ? 'transparent' : 'rgba(74,58,255,0.05)'};">
+                  <div style="font-weight:600;font-size:0.9rem;">${escHtml(n.title)}</div>
+                  <div style="font-size:0.8rem;color:var(--text-secondary);">${escHtml(n.body)}</div>
+                  <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:4px;">${formatDate2(n.createdAt)}</div>
+                </div>
+              `).join('');
+            }
+          }
+        }
+      }).catch(e => console.error(e));
+  }
+
+  function markNotificationsRead() {
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=markNotificationsRead')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) fetchNotifications();
+      });
+  }
+
+  // Close menus when clicking outside
+  document.addEventListener('click', function(e) {
+    const langMenu = document.getElementById('langMenu');
+    const notifMenu = document.getElementById('notifMenu');
+    const langBtn = document.querySelector('.lang-dropdown button');
+    const notifBtn = document.querySelector('.notif-dropdown button');
+    
+    if (langMenu && langBtn && !langBtn.contains(e.target) && !langMenu.contains(e.target)) {
+      langMenu.classList.remove('show');
+    }
+    if (notifMenu && notifBtn && !notifBtn.contains(e.target) && !notifMenu.contains(e.target)) {
+      notifMenu.classList.remove('show');
+    }
+  });
 
   function setLanguage(lang) {
     const form = document.createElement('form');
     form.method = 'POST';
+    form.action = window.location.href;
     form.innerHTML = '<input type="hidden" name="set_language" value="' + lang + '">';
     document.body.appendChild(form);
     form.submit();
@@ -132,811 +222,1097 @@ const RecLise = (function () {
     if (overlay) overlay.classList.toggle('show');
   }
 
+  // Handle logout
+  function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+      window.location.href = '/pfeeeee/PhtP/logout.php';
+    }
+  }
+
   // Toast notification
-  function showToast(message, type = 'info') {
+  function showToast(message, type) {
+    type = type || 'info';
     const container = document.getElementById('toastContainer');
     if (!container) return;
-    
+
     const toast = document.createElement('div');
     toast.className = 'toast-msg ' + type;
     toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle') + ' me-2"></i>' + message;
     container.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
+
+    setTimeout(function() { toast.remove(); }, 3000);
   }
 
   // Close modal
   function closeModal() {
-    const overlay = document.querySelector('.modal-overlay');
-    if (overlay) overlay.remove();
+    document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
   }
 
-  // Filter users table
-  function filterUsers(value) {
-    const table = document.getElementById('usersTable');
-    if (!table) return;
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach(row => {
-      const text = row.textContent.toLowerCase();
-      row.style.display = text.includes(value.toLowerCase()) ? '' : 'none';
-    });
-  }
+    // Submit new request
+    function submitNewRequest() {
+      const type = document.getElementById('reqType')?.value || 'request';
+      const title = document.getElementById('reqTitle')?.value.trim();
+      const category = document.getElementById('reqCategory')?.value || 'technical';
+      const priority = document.getElementById('reqPriority')?.value || 'medium';
+      const desc = document.getElementById('reqDesc')?.value.trim();
+      const files = document.getElementById('reqFiles')?.files || [];
 
-  // Filter by status
-  function filterByStatus() {
-    const select = document.getElementById('statusFilter');
-    if (!select) return;
-    const status = select.value;
-    const rows = document.querySelectorAll('tbody tr[data-status]');
-    rows.forEach(row => {
-      if (!status) {
-        row.style.display = '';
-      } else {
-        row.style.display = row.getAttribute('data-status') === status ? '' : 'none';
+      if (!title || !desc) return showToast('Please fill title and description', 'error');
+
+      const formData = new FormData();
+      formData.append('action', 'createRequest');
+      formData.append('type', type);
+      formData.append('title', title);
+      formData.append('description', desc);
+      formData.append('category', category);
+      formData.append('priority', priority);
+      
+      // Append all files
+      for (let i = 0; i < files.length; i++) {
+        formData.append('attachments[]', files[i]);
       }
-    });
-  }
 
-  // Scroll to reply section
-  function scrollToReply(reqId) {
-    const target = document.getElementById('reqMsg-' + reqId);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      fetch('/pfeeeee/PhtP/ajax/api.php', {
+        method: 'POST',
+        body: formData
+        // No Content-Type header - browser sets it with boundary for FormData
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          showToast('Request submitted successfully', 'success');
+          setTimeout(() => { window.location.href = '/pfeeeee/PhtP/user/track-status.php'; }, 1000);
+        } else {
+          showToast(data.message || 'Error submitting request', 'error');
+        }
+      })
+      .catch(() => showToast('Error submitting request', 'error'));
     }
-    const select = document.getElementById('messageRequestSelect');
-    if (select) select.value = reqId;
-    const replyBox = document.getElementById('messageText') || document.getElementById('messageText');
-    if (replyBox) replyBox.focus();
-  }
 
-  // Send user message (from messages page)
-  function sendUserMessage() {
-    const reqId = parseInt(document.getElementById('messageRequestSelect')?.value);
-    if (!reqId) {
-      showToast('Please select a request', 'error');
-      return;
-    }
-    const text = document.getElementById('messageText')?.value.trim();
-    if (!text) {
-      showToast('Please type a message', 'error');
-      return;
-    }
-    
-    fetch('ajax/api.php?action=replyToRequest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'id=' + reqId + '&body=' + encodeURIComponent(text)
-    })
-    .then(r => r.json())
-    .then(resp => {
-      if (resp.error) {
-        showToast(resp.error, 'error');
-      } else {
-        showToast('Message sent successfully', 'success');
-        const replyBox = document.getElementById('messageText');
-        if (replyBox) replyBox.value = '';
-        setTimeout(() => location.reload(), 500);
-      }
-    })
-    .catch(err => {
-      showToast('Failed to send message', 'error');
-      console.error(err);
-    });
-  }
-
-  // Submit new request
-  function submitNewRequest() {
-    const type = document.getElementById('reqType')?.value;
+  // Submit request from support to admin
+  function submitSupportRequest() {
+    const type = document.getElementById('reqType')?.value || 'request';
     const title = document.getElementById('reqTitle')?.value.trim();
-    const category = document.getElementById('reqCategory')?.value;
-    const priority = document.getElementById('reqPriority')?.value;
+    const category = document.getElementById('reqCategory')?.value || 'technical';
+    const priority = document.getElementById('reqPriority')?.value || 'medium';
     const desc = document.getElementById('reqDesc')?.value.trim();
+    const files = document.getElementById('reqFiles')?.files || [];
+
+    if (!title || !desc) return showToast('Please fill title and description', 'error');
+
+    const formData = new FormData();
+    formData.append('action', 'createRequest');
+    formData.append('type', type);
+    formData.append('title', title);
+    formData.append('description', desc);
+    formData.append('category', category);
+    formData.append('priority', priority);
     
-    if (!title || !desc) {
-      showToast('Please fill required fields', 'error');
-      return;
+    // Append all files
+    for (let i = 0; i < files.length; i++) {
+      formData.append('attachments[]', files[i]);
     }
-    
-    fetch('ajax/api.php?action=createRequest', {
+
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'type=' + type + '&title=' + encodeURIComponent(title) + '&category=' + category + '&priority=' + priority + '&description=' + encodeURIComponent(desc)
+      body: formData
+      // No Content-Type header - browser sets it with boundary for FormData
     })
     .then(r => r.json())
-    .then(resp => {
-      if (resp.error) {
-        showToast(resp.error, 'error');
+    .then(data => {
+      if (data.success) {
+        showToast('Request sent to admin successfully', 'success');
+        setTimeout(() => { window.location.href = '/pfeeeee/PhtP/support/dashboard.php'; }, 1000);
       } else {
-        showToast('Request created successfully', 'success');
-        setTimeout(() => window.location.href = 'track-status.php', 500);
+        showToast(data.message || 'Error submitting request', 'error');
       }
     })
-    .catch(err => {
-      showToast('Failed to create request', 'error');
-      console.error(err);
-    });
+    .catch(() => showToast('Error submitting request', 'error'));
   }
 
-  // View request detail (modal)
-  function viewRequestDetail(id) {
-    fetch('ajax/api.php?action=getRequest&id=' + id)
-    .then(r => r.json())
-    .then(req => {
-      if (req.error) {
-        showToast(req.error, 'error');
-        return;
-      }
-      
-      let messagesHtml = '';
-      if (req.messages && req.messages.length) {
-        req.messages.forEach(msg => {
-          const senderType = msg.senderType || 'user';
-          const icon = senderType === 'user' ? 'user' : (senderType === 'system' ? 'cog' : 'headset');
-          messagesHtml += `
-            <div class="timeline-item">
-              <div class="timeline-marker ${senderType}">
-                <i class="fas fa-${icon}"></i>
-              </div>
-              <div class="timeline-content">
-                <div class="timeline-header">
-                  <span class="timeline-author ${senderType}">
-                    <i class="fas fa-${icon} me-1"></i>${msg.senderType === 'system' ? 'System' : (msg.senderType === 'user' ? 'User' : 'Support')}
-                  </span>
-                  <span class="timeline-date">${new Date(msg.createdAt).toLocaleString()}</span>
+   // View request detail
+   function viewRequestDetail(id) {
+     const overlay = document.createElement('div');
+     overlay.className = 'modal-overlay';
+     overlay.innerHTML = `
+       <div class="modal-box modal-lg">
+         <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+         <h3><i class="fas fa-eye me-2"></i>Request #${id}</h3>
+         <div id="requestDetailContent">
+           <div class="text-center text-secondary p-4">Loading...</div>
+         </div>
+       </div>`;
+     document.body.appendChild(overlay);
+     
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getRequest&id=' + id)
+      .then(r => r.text())
+      .then(text => {
+        const el = overlay.querySelector('#requestDetailContent');
+        try {
+          const data = JSON.parse(text);
+          if (data.status === 'success' || data.success) {
+            const r = data.request;
+            const typeIcon = r.type === 'complaint' ? 'fa-exclamation-triangle' : 'fa-question-circle';
+            const catIcon = getRequestIcon(r.category);
+            let html = `
+              <div class="glass-card mb-3" style="padding:16px;border-left:4px solid var(--warning);">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <h5 style="margin:0;"><i class="fas fa-info-circle me-2"></i>Request Details</h5>
+                  <span class="status-pill status-${r.status}">${r.status}</span>
                 </div>
-                <div class="timeline-message">${msg.body}</div>
+                <div class="row text-center mb-3">
+                  <div class="col-4">
+                    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Type</div>
+                    <div style="font-weight:600;"><i class="fas ${typeIcon} me-1"></i>${r.type || 'Request'}</div>
+                  </div>
+                  <div class="col-4">
+                    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Priority</div>
+                    <div style="font-weight:600;"><i class="fas fa-flag me-1"></i><span class="priority-${r.priority}">${r.priority}</span></div>
+                  </div>
+                  <div class="col-4">
+                    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Category</div>
+                    <div style="font-weight:600;"><i class="fas ${catIcon} me-1"></i>${r.category || 'N/A'}</div>
+                  </div>
+                </div>
+                <div class="mb-2"><strong>Title:</strong> ${r.title || ''}</div>
+                <div class="mb-2"><strong>From:</strong> ${r.requester_name || 'N/A'}</div>
+                <div class="mb-2"><strong>Assigned To:</strong> ${r.assigned_to ? 'Agent #' + r.assigned_to : 'N/A'}</div>
+                <div><strong>Created At:</strong> ${r.created_at ? formatDate2(r.created_at) : 'N/A'}</div>
               </div>
-            </div>
-          `;
-        });
+              
+              <div class="mb-3">
+                <strong>Description:</strong>
+                <p style="margin-top:6px;color:var(--text-secondary);padding:12px;background:rgba(0,0,0,0.1);border-radius:8px;">${r.description || 'N/A'}</p>
+              </div>
+              <div class="mb-3">
+                <strong>Attachments:</strong>
+                <div style="margin-top:6px;">
+                   ${r.attachments && r.attachments.length > 0 ? r.attachments.map(a => { const fp = a.filePath && a.filePath.startsWith('uploads/') ? '/pfeeeee/PhtP/' + a.filePath : '/pfeeeee/PhtP/uploads/' + (a.filePath || ''); return `<span class="chip" style="cursor:pointer;margin-right:4px;" onclick="window.open('${fp}', '_blank')"><i class="fas fa-paperclip me-1"></i>${escHtml(a.fileName || a.file_name)}</span>`; }).join('') : ''}
+                </div>
+              </div>`;
+            if (r.messages && r.messages.length > 0) {
+              html += '<h5 class="mt-3 mb-2"><i class="fas fa-comments me-2"></i>Message Thread</h5>';
+              html += '<div class="timeline">';
+              r.messages.forEach(m => {
+                const isSup = m.sender_id !== r.user_id;
+                const cls = isSup ? 'support' : 'user';
+                const icon = isSup ? 'fa-user-shield' : 'fa-user';
+                const author = m.sender_name || (isSup ? 'Support' : 'User');
+                html += `<div class="timeline-item ${cls}" style="margin-bottom:16px;">
+                  <div class="timeline-marker ${cls}"><i class="fas ${icon}"></i></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="timeline-author ${cls}"><i class="fas ${icon} me-1"></i>${escHtml(author)}</span>
+                      <span class="timeline-date"><i class="fas fa-clock me-1"></i>${m.created_at ? formatDate2(m.created_at) : ''}</span>
+                    </div>
+                    <div class="timeline-message">${escHtml(m.body)}</div>
+                  </div>
+                </div>`;
+              });
+              html += '</div>';
+            }
+            html += `
+              <div class="d-flex justify-content-end gap-2 mt-3">`;
+            if (typeof CURRENT_USER_ROLE !== 'undefined' && CURRENT_USER_ROLE === 'user' && r.status !== 'resolved' && r.status !== 'closed') {
+              html += `
+                <button class="btn btn-outline-neon" onclick="RecLise.editRequest(${r.id})">
+                  <i class="fas fa-edit me-1"></i>Edit
+                </button>
+                <button class="btn btn-neon-danger" onclick="RecLise.deleteRequest(${r.id})">
+                  <i class="fas fa-trash me-1"></i>Delete
+                </button>`;
+            }
+            html += `
+                <button class="btn btn-outline-neon" onclick="RecLise.closeModal()">Close</button>
+              </div>`;
+            el.innerHTML = html;
+          } else {
+            el.innerHTML = '<div class="text-danger">Error: ' + (data.message || 'Unknown error') + '</div>';
+          }
+        } catch (e) {
+          el.innerHTML = '<div class="text-danger">Error parsing response: ' + e.message + '<br><small>' + text.substring(0, 200) + '</small></div>';
+        }
+      })
+       .catch(e => {
+        document.getElementById('requestDetailContent').innerHTML = '<div class="text-danger">Network error: ' + e.message + '</div>';
+      });
+  }
+
+    // Show attachments modal
+   function showAttachments(id, namesStr, pathsStr) {
+     const names = namesStr.split('||').filter(n => n);
+     const paths = pathsStr.split('||').filter(p => p);
+     let filesHtml = '';
+     if (names.length > 0) {
+       names.forEach((name, idx) => {
+         const path = paths[idx] || '';
+          const fullPath = path && path.startsWith('uploads/') ? '/pfeeeee/PhtP/' + path : '/pfeeeee/PhtP/uploads/' + (path || '');
+         filesHtml += `<span class="chip" style="cursor:pointer;margin:4px;" onclick="window.open('${fullPath}', '_blank')">
+           <i class="fas fa-paperclip me-1"></i>${escHtml(name)}
+         </span>`;
+       });
       } else {
-        messagesHtml = '<p class="text-secondary">No messages yet.</p>';
+        filesHtml = '';
       }
-      
-      const content = `
-        <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
-        <h3><i class="fas fa-eye me-2"></i>Request #${req.id}</h3>
-        <div class="glass-card mb-3" style="padding: 16px;">
-          <h5>${req.title}</h5>
-          <div class="mb-2">
-            <span class="status-pill status-${req.status}">${req.status}</span>
-            <span class="chip">${req.category}</span>
-            <span class="chip">${req.priority} priority</span>
-          </div>
-          <p>${req.description}</p>
-        </div>
-        <h5 class="mb-3"><i class="fas fa-comments me-2"></i>Messages</h5>
-        <div class="timeline">
-          ${messagesHtml}
-        </div>
-      `;
-      
-      showModal(content);
-    })
-    .catch(err => {
-      showToast('Failed to load request', 'error');
-      console.error(err);
-    });
-  }
+     const overlay = document.createElement('div');
+     overlay.className = 'modal-overlay';
+     overlay.onclick = function(e) {
+       if (e.target === overlay) RecLise.closeModal();
+     };
+     overlay.innerHTML = `
+       <div class="modal-box">
+         <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+         <h3><i class="fas fa-paperclip me-2"></i>Attachments — #${id}</h3>
+         <div style="margin-top:16px;">
+           ${filesHtml}
+         </div>
+         <div class="d-flex justify-content-end mt-3">
+           <button class="btn btn-outline-neon" onclick="RecLise.closeModal()">Close</button>
+         </div>
+       </div>`;
+     document.body.appendChild(overlay);
+   }
 
-  // Show modal
-  function showModal(content) {
-    let overlay = document.querySelector('.modal-overlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.className = 'modal-overlay';
-      document.body.appendChild(overlay);
-    }
-    overlay.innerHTML = `<div class="modal-box">${content}</div>`;
-    overlay.style.display = 'flex';
-    overlay.onclick = function(e) {
-      if (e.target === overlay) closeModal();
-    };
-  }
-
-  // Handle logout
-  function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
-      window.location.href = 'logout.php';
-    }
-  }
-
-  // Show Add User Modal
-  function showAddUserModal() {
-    const content = `
-      <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
-      <h3><i class="fas fa-user-plus me-2"></i>Add User</h3>
-      <form onsubmit="event.preventDefault(); RecLise.addUser();">
-        <div class="mb-3">
-          <label class="form-label">Full Name</label>
-          <input type="text" class="form-control" id="modalFullName" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input type="email" class="form-control" id="modalEmail" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Role</label>
-          <select class="form-select" id="modalRole">
-            <option value="user">User</option>
-            <option value="support">Support</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Department</label>
-          <input type="text" class="form-control" id="modalDept">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Phone</label>
-          <input type="text" class="form-control" id="modalPhone">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Password</label>
-          <input type="password" class="form-control" id="modalPass" placeholder="Leave blank for default">
-        </div>
-        <button type="submit" class="btn btn-neon w-100">Save</button>
-      </form>
-    `;
-    showModal(content);
-  }
-
-  // Add User
-  function addUser() {
-    const name = document.getElementById('modalFullName')?.value.trim();
-    const email = document.getElementById('modalEmail')?.value.trim();
-    const role = document.getElementById('modalRole')?.value;
-    const dept = document.getElementById('modalDept')?.value.trim();
-    const phone = document.getElementById('modalPhone')?.value.trim();
-    const pass = document.getElementById('modalPass')?.value;
-
-    if (!name || !email) {
-      showToast('Name and email required', 'error');
-      return;
-    }
-
-    fetch('ajax/api.php?action=addUser', {
+   // Process request
+   function processRequest(id) {
+    if (!confirm('Process this request?')) return;
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'fullName=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + '&role=' + role + '&department=' + encodeURIComponent(dept) + '&phone=' + encodeURIComponent(phone) + '&password=' + encodeURIComponent(pass)
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'processRequest', id: id})
     })
     .then(r => r.json())
-    .then(resp => {
-      if (resp.error) {
-        showToast(resp.error, 'error');
+    .then(data => {
+      if (data.success) {
+        showToast('Request processed successfully', 'success');
+        setTimeout(() => location.reload(), 1000);
       } else {
-        showToast('User added successfully', 'success');
-        closeModal();
-        setTimeout(() => location.reload(), 500);
+        showToast(data.message || 'Error processing request', 'error');
       }
     })
-    .catch(err => {
-      showToast('Failed to add user', 'error');
-      console.error(err);
-    });
+    .catch(() => showToast('Error processing request', 'error'));
   }
 
-  // Show Edit User Modal
-  function showEditUserModal(id) {
-    fetch('ajax/api.php?action=getUser&id=' + id)
-    .then(r => r.json())
-    .then(user => {
-      if (user.error) {
-        showToast(user.error, 'error');
-        return;
-      }
-      const content = `
+  // Show add training modal
+  function showAddTrainingModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'addTrainingOverlay';
+    overlay.innerHTML = `
+      <div class="modal-box">
         <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
-        <h3><i class="fas fa-user-edit me-2"></i>Edit User</h3>
-        <form onsubmit="event.preventDefault(); RecLise.editUser(' + id + ')">
+        <h3><i class="fas fa-plus me-2"></i>Add Training Session</h3>
+        <div>
           <div class="mb-3">
-            <label class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="modalFullName" value="${user.full_name || ''}" required>
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" id="newTitle" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" id="modalEmail" value="${user.email || ''}" required>
+            <label class="form-label">Description</label>
+            <textarea class="form-control" id="newDesc" rows="3"></textarea>
           </div>
           <div class="mb-3">
-            <label class="form-label">Department</label>
-            <input type="text" class="form-control" id="modalDept" value="${user.department || ''}">
+            <label class="form-label">Date</label>
+            <input type="datetime-local" class="form-control" id="newDate" required>
+          </div>
+          <button type="button" class="btn btn-neon" onclick="RecLise.doAddTraining()">Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+
+  // Do add training
+  function doAddTraining() {
+    const title = document.getElementById('newTitle')?.value.trim();
+    const desc = document.getElementById('newDesc')?.value.trim();
+    const date = document.getElementById('newDate')?.value;
+
+    if (!title || !date) {
+      return showToast('Title and date required', 'error');
+    }
+
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'addTrainingSession', title: title, description: desc, session_date: date.replace('T', ' ') + ':00'})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Training session added', 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showToast(data.message || 'Error adding training', 'error');
+      }
+    })
+    .catch(err => showToast('Error: ' + err.message, 'error'));
+  }
+
+  // Edit training
+  function editTraining(id) {
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getTrainingSession&id=' + id)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          const t = data.session;
+          const overlay = document.createElement('div');
+          overlay.className = 'modal-overlay';
+          overlay.innerHTML = `
+            <div class="modal-box">
+              <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+              <h3><i class="fas fa-edit me-2"></i>Edit Training Session</h3>
+              <form id="editTrainingForm">
+                <div class="mb-3">
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-control" name="title" value="${t.title || ''}" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-control" name="description" rows="3">${t.description || ''}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Date</label>
+                  <input type="datetime-local" class="form-control" name="date" value="${t.session_date ? t.session_date.replace(' ', 'T').substring(0, 16) : ''}" required>
+                </div>
+                <button type="button" class="btn btn-neon" onclick="RecLise.updateTraining(${id})">Update</button>
+              </form>
+            </div>`;
+          document.body.appendChild(overlay);
+        } else {
+          RecLise.showToast('Error loading training', 'error');
+        }
+      })
+    .catch(err => RecLise.showToast('Error: ' + err.message, 'error'));
+  }
+
+  // Update training
+  function updateTraining(id) {
+    const form = document.getElementById('editTrainingForm');
+    if (!form) return;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    if (!data.title || !data.date) {
+        RecLise.showToast('Title and date required', 'error');
+        return;
+    }
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'updateTrainingSession', id: id, title: data.title, description: data.description, session_date: data.date ? data.date.replace('T', ' ') + ':00' : ''})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        RecLise.showToast('Training session updated', 'success');
+        RecLise.closeModal();
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        RecLise.showToast(data.message || 'Error updating training', 'error');
+      }
+    })
+    .catch(err => RecLise.showToast('Error: ' + err.message, 'error'));
+  }
+
+  // Delete training
+  function deleteTraining(id) {
+    if (!confirm('Delete this training session?')) return;
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'deleteTrainingSession', id: id})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        RecLise.showToast('Training deleted', 'success');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        RecLise.showToast(data.message || 'Error deleting training', 'error');
+      }
+    })
+    .catch(err => RecLise.showToast('Error: ' + err.message, 'error'));
+  }
+
+  // Delete training confirmation
+  function deleteTrainingConfirm(id) {
+    if (!confirm('Delete this training session?')) return;
+    deleteTraining(id);
+  }
+
+  // View registrations
+  function viewRegistrations(sessionId) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+        <h3><i class="fas fa-list me-2"></i>Registrations</h3>
+        <div id="registrationsContent">
+          <div class="text-center text-secondary p-4">Loading...</div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getTrainingRegistrations&session_id=' + sessionId)
+      .then(r => r.json())
+      .then(data => {
+        const el = document.getElementById('registrationsContent');
+        if (data.success && data.registrations && data.registrations.length > 0) {
+          let html = '<table class="table-glass"><thead><tr><th>Name</th><th>Email</th><th>Date</th></tr></thead><tbody>';
+          data.registrations.forEach(reg => {
+            html += `<tr><td>${reg.full_name || ''}</td><td>${reg.email || ''}</td><td>${reg.registered_at || ''}</td></tr>`;
+          });
+          html += '</tbody></table>';
+          el.innerHTML = html;
+        } else {
+          el.innerHTML = '<div class="text-secondary text-center p-4">No registrations yet</div>';
+        }
+      })
+      .catch(() => {
+        document.getElementById('registrationsContent').innerHTML = '<div class="text-danger">Error loading registrations</div>';
+      });
+  }
+
+  // Show add guide modal
+  function showAddGuideModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+        <h3><i class="fas fa-plus me-2"></i>Add Guide</h3>
+        <form onsubmit="RecLise.submitGuide(event)">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" name="title" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Phone</label>
-            <input type="text" class="form-control" id="modalPhone" value="${user.phone || ''}">
+            <label class="form-label">Content</label>
+            <textarea class="form-control" name="content" rows="5" required></textarea>
           </div>
           <div class="mb-3">
-            <label class="form-label">Status</label>
-            <select class="form-select" id="modalStatus">
-              <option value="active" ${user.status === 'active' ? 'selected' : ''}>Active</option>
-              <option value="inactive" ${user.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+            <label class="form-label">Category</label>
+            <select class="form-control" name="category">
+              <option value="technical">Technical</option>
+              <option value="billing">Billing</option>
+              <option value="general">General</option>
             </select>
           </div>
-          <button type="submit" class="btn btn-neon w-100">Save</button>
+          <button type="submit" class="btn btn-neon">Save</button>
         </form>
-      `;
-      showModal(content);
-    })
-    .catch(err => {
-      showToast('Failed to load user', 'error');
-      console.error(err);
-    });
+      </div>`;
+    document.body.appendChild(overlay);
   }
 
-  // Edit User
-  function editUser(id) {
-    const name = document.getElementById('modalFullName')?.value.trim();
-    const email = document.getElementById('modalEmail')?.value.trim();
-    const dept = document.getElementById('modalDept')?.value.trim();
-    const phone = document.getElementById('modalPhone')?.value.trim();
-    const status = document.getElementById('modalStatus')?.value;
+  // Submit guide
+  function submitGuide(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'addGuide', title: data.title, content: data.content, category: data.category})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Guide added', 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showToast(data.message || 'Error adding guide', 'error');
+      }
+    })
+    .catch(() => showToast('Error adding guide', 'error'));
+  }
 
-    fetch('ajax/api.php?action=updateUser', {
+  // Edit guide
+  function editGuide(id) {
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getGuide&id=' + id)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          const g = data.guide;
+          const overlay = document.createElement('div');
+          overlay.className = 'modal-overlay';
+          overlay.innerHTML = `
+            <div class="modal-box">
+              <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+              <h3><i class="fas fa-edit me-2"></i>Edit Guide</h3>
+              <form onsubmit="RecLise.updateGuide(event, ${id})">
+                <div class="mb-3">
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-control" name="title" value="${g.title || ''}" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Content</label>
+                  <textarea class="form-control" name="content" rows="5" required>${g.content || ''}</textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Category</label>
+                  <select class="form-control" name="category">
+                    <option value="technical" ${g.category === 'technical' ? 'selected' : ''}>Technical</option>
+                    <option value="billing" ${g.category === 'billing' ? 'selected' : ''}>Billing</option>
+                    <option value="general" ${g.category === 'general' ? 'selected' : ''}>General</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-neon">Update</button>
+              </form>
+            </div>`;
+          document.body.appendChild(overlay);
+        } else {
+          showToast('Error loading guide', 'error');
+        }
+      })
+      .catch(() => showToast('Error loading guide', 'error'));
+  }
+
+  // Update guide
+  function updateGuide(e, id) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'editGuide', id: id, title: data.title, content: data.content, category: data.category})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Guide updated', 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showToast(data.message || 'Error updating guide', 'error');
+      }
+    })
+    .catch(() => showToast('Error updating guide', 'error'));
+  }
+
+  // Delete guide confirmation
+  function deleteGuideConfirm(id) {
+    if (!confirm('Delete this guide?')) return;
+    deleteGuide(id);
+  }
+
+  // Delete guide
+  function deleteGuide(id) {
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'deleteGuide', id: id})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Guide deleted', 'success');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showToast(data.message || 'Error deleting guide', 'error');
+      }
+    })
+    .catch(() => showToast('Error deleting guide', 'error'));
+  }
+
+  // View assist guide
+  function viewAssistGuide(id) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+        <h3><i class="fas fa-book-open me-2"></i>Guide</h3>
+        <div id="guideContent">
+          <div class="text-center text-secondary p-4">Loading...</div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getGuide&id=' + id)
+      .then(r => r.json())
+      .then(data => {
+        const el = document.getElementById('guideContent');
+        if (data.success) {
+          const g = data.guide;
+          el.innerHTML = `
+            <h4>${g.title || ''}</h4>
+            <span class="chip">${g.category || ''}</span>
+            <div class="mt-3">${g.content || ''}</div>`;
+        } else {
+          el.innerHTML = '<div class="text-danger">Error loading guide</div>';
+        }
+      })
+      .catch(() => {
+        document.getElementById('guideContent').innerHTML = '<div class="text-danger">Error loading guide</div>';
+      });
+  }
+
+  // View resolved request
+  function viewResolvedRequest(id) {
+    viewRequestDetail(id);
+  }
+
+  // Show reply modal for incoming requests
+  function showReplyModal(id) {
+    try {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-box modal-lg">
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3><i class="fas fa-eye me-2"></i>Request Details — #${id}</h3>
+          <div id="replyModalContent">
+            <div class="text-center text-secondary p-4">Loading...</div>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=getRequest&id=' + id)
+        .then(r => r.json())
+        .then(data => {
+          const el = overlay.querySelector('#replyModalContent');
+          if (!el) return;
+          if (data.success) {
+            const r = data.request;
+            const typeIcon = r.type === 'complaint' ? 'fa-exclamation-triangle' : 'fa-question-circle';
+            let html = `
+              <div class="glass-card mb-3" style="padding:16px;border-left:4px solid var(${r.status === 'escalated' ? '--warning' : '--info'});">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <h5 style="margin:0;"><i class="fas fa-info-circle me-2"></i>Request Details</h5>
+                  <span class="status-pill status-${r.status}">${(r.status || '').charAt(0).toUpperCase() + (r.status || '').slice(1)}</span>
+                </div>
+                <div class="row text-center mb-3">
+                  <div class="col-4">
+                    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Type</div>
+                    <div style="font-weight:600;"><i class="fas ${typeIcon} me-1"></i>${(r.type || 'Request').charAt(0).toUpperCase() + (r.type || 'Request').slice(1)}</div>
+                  </div>
+                  <div class="col-4">
+                    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Priority</div>
+                    <div style="font-weight:600;"><i class="fas fa-flag me-1"></i>${(r.priority || 'Low').charAt(0).toUpperCase() + (r.priority || 'Low').slice(1)}</div>
+                  </div>
+                  <div class="col-4">
+                    <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Category</div>
+                    <div style="font-weight:600;"><i class="fas fa-cogs me-1"></i>${(r.category || 'N/A').charAt(0).toUpperCase() + (r.category || 'N/A').slice(1)}</div>
+                  </div>
+                </div>
+                <div class="mb-2"><strong>Title:</strong> ${r.title || ''}</div>
+                <div class="mb-2"><strong>From:</strong> ${r.requester_name || r.requesterName || 'N/A'}</div>
+                <div class="mb-2"><strong>Assigned To:</strong> ${r.assignedName || r.assigned_to_name || 'N/A'}</div>
+                <div><strong>Created At:</strong> ${r.created_at || r.createdAt ? formatDate2(r.created_at || r.createdAt) : 'N/A'}</div>
+              </div>
+              
+              <div class="mb-3">
+                <strong>Description:</strong>
+                <p style="margin-top:6px;color:var(--text-secondary);padding:12px;background:rgba(0,0,0,0.1);border-radius:8px;">${r.description || 'N/A'}</p>
+              </div>
+              
+              <div class="mb-3">
+                <strong>Attachments:</strong>
+                <div style="margin-top:6px;">
+                  ${r.attachments && r.attachments.length > 0 ? r.attachments.map(a => { const fp = a.filePath && a.filePath.startsWith('uploads/') ? '/pfeeeee/PhtP/' + a.filePath : '/pfeeeee/PhtP/uploads/' + (a.filePath || ''); return `<span class="chip" style="cursor:pointer;margin-right:4px;" onclick="window.open('${fp}', '_blank')"><i class="fas fa-paperclip me-1"></i>${escHtml(a.fileName || a.file_name)}</span>`; }).join('') : ''}
+                </div>
+              </div>`;
+
+            if (r.messages && r.messages.length > 0) {
+              html += '<h5 class="mt-3 mb-2"><i class="fas fa-comments me-2"></i>Message Thread</h5>';
+              html += '<div class="timeline" style="margin-bottom:16px;">';
+              r.messages.forEach(m => {
+                const isSup = m.senderType !== 'user';
+                const cls = isSup ? 'support' : 'user';
+                const icon = isSup ? 'fa-user-shield' : 'fa-user';
+                const author = m.senderName || (isSup ? 'Support' : 'User');
+                html += `<div class="timeline-item ${cls}" style="margin-bottom:16px;">
+                  <div class="timeline-marker ${cls}"><i class="fas ${icon}"></i></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="timeline-author ${cls}"><i class="fas ${icon} me-1"></i>${escHtml(author)}</span>
+                      <span class="timeline-date"><i class="fas fa-clock me-1"></i>${m.createdAt ? formatDate2(m.createdAt) : ''}</span>
+                    </div>
+                    <div class="timeline-body">${m.body ? escHtml(m.body).replace(/\n/g, '<br>') : ''}</div>
+                  </div>
+                </div>`;
+              });
+              html += '</div>';
+            }
+              
+            if (r.status === 'escalated') {
+              html += `
+              <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-outline-neon" onclick="RecLise.closeModal()">Close</button>
+              </div>`;
+            } else {
+              html += `
+              <div class="glass-card mb-3" style="padding:16px;">
+                <h5 style="margin-bottom:14px;"><i class="fas fa-pen me-2"></i>Your Reply</h5>
+                <textarea class="form-control" id="replyText" rows="4" placeholder="Write your reply here..."></textarea>
+              </div>
+              
+              <div class="d-flex gap-2">
+                <button class="btn btn-neon" style="flex:1;" onclick="RecLise.submitReply(${id})"><i class="fas fa-check me-2"></i>Reply & Update</button>
+                <button class="btn btn-outline-neon" style="flex:1;" onclick="RecLise.escalateToAdmin(${id})"><i class="fas fa-arrow-up me-1"></i>Escalate to Admin</button>
+              </div>`;
+            }
+            el.innerHTML = html;
+          } else {
+            el.innerHTML = '<div class="text-danger">Error loading request</div>';
+          }
+        })
+        .catch(err => {
+          const el = document.getElementById('replyModalContent');
+          if (el) {
+            el.innerHTML = '<div class="text-danger">Error loading request: ' + err.message + '</div>';
+          }
+        });
+    } catch (err) {
+      showToast('Error opening modal: ' + err.message, 'error');
+    }
+  }
+
+   // Send reply from messages page (User side)
+   function sendReply(id) {
+     const textarea = document.getElementById('userReplyText_' + id);
+     const reply = textarea?.value.trim();
+     if (!reply) return showToast('Please write a reply', 'error');
+     
+     fetch('/pfeeeee/PhtP/ajax/api.php?action=replyToRequest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + id + '&body=' + encodeURIComponent(reply)
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp.error) { showToast(resp.error, 'error'); }
+        else {
+          showToast('Reply sent successfully', 'success');
+          setTimeout(() => location.reload(), 500);
+        }
+      })
+      .catch(err => { showToast('Failed to send reply', 'error'); console.error(err); });
+   }
+
+    // Submit reply and resolve
+    function submitReply(id) {
+      let reply = document.getElementById('replyText')?.value.trim();
+      if (!reply) {
+        const textarea = document.getElementById('userReplyText_' + id);
+        reply = textarea?.value.trim();
+      }
+      if (!reply) return showToast('Please write a reply', 'error');
+
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=updateRequestStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + id + '&status=resolved&reply=' + encodeURIComponent(reply)
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp.error) { showToast(resp.error, 'error'); }
+        else {
+          showToast('Reply sent successfully', 'success');
+          closeModal();
+          setTimeout(() => location.reload(), 500);
+        }
+      })
+      .catch(err => { showToast('Failed to send reply', 'error'); console.error(err); });
+    }
+
+  // Escalate to admin
+  function escalateToAdmin(id) {
+    const reply = document.getElementById('replyText')?.value.trim();
+    const body = reply ? '&body=' + encodeURIComponent(reply) : '';
+
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=escalateRequest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'id=' + id + '&fullName=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + '&department=' + encodeURIComponent(dept) + '&phone=' + encodeURIComponent(phone) + '&status=' + status
+      body: 'id=' + id + body
     })
     .then(r => r.json())
     .then(resp => {
-      if (resp.error) {
-        showToast(resp.error, 'error');
-      } else {
-        showToast('User updated successfully', 'success');
+      if (resp.error) { showToast(resp.error, 'error'); }
+      else {
+        showToast('Escalated to admin', 'success');
         closeModal();
         setTimeout(() => location.reload(), 500);
       }
     })
-    .catch(err => {
-      showToast('Failed to update user', 'error');
-      console.error(err);
-    });
+    .catch(err => { showToast('Failed to escalate', 'error'); console.error(err); });
   }
 
-  // Delete User
-  function deleteUser(id) {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-
-    fetch('ajax/api.php?action=deleteUser', {
+  // Save dashboard customization
+  function saveDashboard() {
+    const data = {
+      action: 'saveDashboard',
+      widget_requests: document.getElementById('uwRequests')?.checked ? 1 : 0,
+      widget_users: document.getElementById('uwUsers')?.checked ? 1 : 0,
+      widget_stats: document.getElementById('uwStats')?.checked ? 1 : 0,
+      widget_activity: document.getElementById('uwActivity')?.checked ? 1 : 0
+    };
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'id=' + id
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
     })
     .then(r => r.json())
-    .then(resp => {
-      if (resp.error) {
-        showToast(resp.error, 'error');
+    .then(data => {
+      if (data.success) {
+        showToast('Dashboard settings saved', 'success');
       } else {
-        showToast('User deleted successfully', 'success');
-        setTimeout(() => location.reload(), 500);
+        showToast(data.message || 'Error saving settings', 'error');
       }
     })
-    .catch(err => {
-      showToast('Failed to delete user', 'error');
-      console.error(err);
-    });
+    .catch(() => showToast('Error saving settings', 'error'));
+  }
+
+  // Render content (for messages page)
+  function renderContent(view) {
+    const contentEl = document.getElementById('contentArea');
+    if (!contentEl) return;
+    
+    contentEl.innerHTML = '<div class="text-center text-secondary p-4">Loading...</div>';
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getContent&view=' + view)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          contentEl.innerHTML = data.html || '<div class="text-secondary text-center p-4">No content</div>';
+        } else {
+          contentEl.innerHTML = '<div class="text-danger">Error loading content</div>';
+        }
+      })
+      .catch(() => {
+        contentEl.innerHTML = '<div class="text-danger">Error loading content</div>';
+      });
   }
 
   // Initialize on load
+  function getRequestIcon(category) {
+    const icons = {
+      technical: 'fa-cogs',
+      access: 'fa-key',
+      training: 'fa-graduation-cap',
+      complaint: 'fa-exclamation-triangle'
+    };
+    return icons[category] || 'fa-question-circle';
+  }
+
+  function formatDate2(dateStr) {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + String(d.getDate()).padStart(2,'0') + ', ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  function escHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  function registerForTraining(sessionId) {
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'registerTraining', session_id: sessionId })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Registered successfully', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.message || 'Already registered', 'error');
+      }
+    })
+    .catch(() => showToast('Error registering', 'error'));
+  }
+
+  function unregisterFromTraining(sessionId) {
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'unregisterTraining', session_id: sessionId })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Unregistered successfully', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.message || 'Error unregistering', 'error');
+      }
+    })
+    .catch(() => showToast('Error unregistering', 'error'));
+  }
+
+  function editRequest(id) {
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getRequest&id=' + id)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) return showToast('Error loading request', 'error');
+        const r = data.request;
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+          <div class="modal-box modal-lg">
+            <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-edit me-2"></i>Edit Request #${id}</h3>
+            <form id="editRequestForm" class="mt-3">
+              <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input type="text" class="form-control" id="editReqTitle" value="${escHtml(r.title || '')}" required>
+              </div>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="form-label">Category</label>
+                  <select class="form-select" id="editReqCategory">
+                    <option value="technical" ${r.category === 'technical' ? 'selected' : ''}>Technical</option>
+                    <option value="access" ${r.category === 'access' ? 'selected' : ''}>Access</option>
+                    <option value="training" ${r.category === 'training' ? 'selected' : ''}>Training</option>
+                    <option value="complaint" ${r.category === 'complaint' ? 'selected' : ''}>Complaint</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Priority</label>
+                  <select class="form-select" id="editReqPriority">
+                    <option value="low" ${r.priority === 'low' ? 'selected' : ''}>Low</option>
+                    <option value="medium" ${r.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                    <option value="high" ${r.priority === 'high' ? 'selected' : ''}>High</option>
+                    <option value="urgent" ${r.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" id="editReqDesc" rows="4" required>${escHtml(r.description || '')}</textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-neon" onclick="RecLise.closeModal()">Cancel</button>
+                <button type="button" class="btn btn-neon" onclick="RecLise.saveEditRequest(${id})">Save Changes</button>
+              </div>
+            </form>
+          </div>`;
+        RecLise.closeModal();
+        document.body.appendChild(overlay);
+      });
+  }
+
+  function saveEditRequest(id) {
+    const title = document.getElementById('editReqTitle').value.trim();
+    const category = document.getElementById('editReqCategory').value;
+    const priority = document.getElementById('editReqPriority').value;
+    const description = document.getElementById('editReqDesc').value.trim();
+    if (!title || !description) return showToast('Title and description required', 'error');
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'editRequest', id, title, category, priority, description })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Request updated successfully', 'success');
+        RecLise.closeModal();
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.message || 'Error updating request', 'error');
+      }
+    })
+    .catch(() => showToast('Error updating request', 'error'));
+  }
+
+  function deleteRequest(id) {
+    if (!confirm('Are you sure you want to delete this request? This cannot be undone.')) return;
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'deleteRequest', id })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Request deleted successfully', 'success');
+        RecLise.closeModal();
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.message || 'Error deleting request', 'error');
+      }
+    })
+    .catch(() => showToast('Error deleting request', 'error'));
+  }
+
+  function filterByStatus() {
+    const val = document.getElementById('statusFilter')?.value || '';
+    const rows = document.querySelectorAll('.table-glass tbody tr');
+    rows.forEach(tr => {
+      const s = tr.getAttribute('data-status') || '';
+      tr.style.display = (!val || s === val) ? '' : 'none';
+    });
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  // Show Add Training Modal
-  function showAddTrainingModal() {
-    showModal('<h3>Add Training Session</h3><form onsubmit="event.preventDefault(); RecLise.addTraining();"><div class="mb-3"><label class="form-label">Title</label><input type="text" class="form-control" id="trainingTitle" required></div><div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" id="trainingDesc" rows="3"></textarea></div><div class="mb-3"><label class="form-label">Date</label><input type="date" class="form-control" id="trainingDate" required></div><div class="mb-3"><label class="form-label">Duration (hours)</label><input type="number" class="form-control" id="trainingDuration" min="1" value="1"></div><button type="submit" class="btn btn-neon w-100">Add Session</button></form>');
-  }
-
-  // Add Training
-  function addTraining() {
-    var title = document.getElementById('trainingTitle').value;
-    var desc = document.getElementById('trainingDesc').value;
-    var date = document.getElementById('trainingDate').value;
-    var duration = document.getElementById('trainingDuration').value;
-    fetch('ajax/api.php?action=addTrainingSession', {
-      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'title=' + encodeURIComponent(title) + '&description=' + encodeURIComponent(desc) + '&date=' + encodeURIComponent(date) + '&duration=' + encodeURIComponent(duration)
-    })
-    .then(r => r.json())
-    .then(resp => {
-      if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Training added', 'success'); closeModal(); setTimeout(() => location.reload(), 500); }
-    })
-    .catch(err => { showToast('Failed to add training', 'error'); console.error(err); });
-  }
-
-  // Edit Training
-  function editTraining(id) {
-    fetch('ajax/api.php?action=getTrainingSession&id=' + id)
-    .then(r => r.json())
-    .then(session => {
-      showModal('<h3>Edit Training Session</h3><form onsubmit="event.preventDefault(); RecLise.saveEditSession(' + id + ');"><div class="mb-3"><label class="form-label">Title</label><input type="text" class="form-control" id="editTrainingTitle" value="' + (session.title || '') + '" required></div><div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" id="editTrainingDesc" rows="3">' + (session.description || '') + '</textarea></div><div class="mb-3"><label class="form-label">Date</label><input type="date" class="form-control" id="editTrainingDate" value="' + (session.date || '') + '" required></div><div class="mb-3"><label class="form-label">Duration (hours)</label><input type="number" class="form-control" id="editTrainingDuration" min="1" value="' + (session.duration || 1) + '"></div><button type="submit" class="btn btn-neon w-100">Save Changes</button></form>');
-    });
-  }
-
-  function saveEditSession(id) {
-    var title = document.getElementById('editTrainingTitle').value;
-    var desc = document.getElementById('editTrainingDesc').value;
-    var date = document.getElementById('editTrainingDate').value;
-    var duration = document.getElementById('editTrainingDuration').value;
-    fetch('ajax/api.php?action=updateTrainingSession', {
-      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'id=' + id + '&title=' + encodeURIComponent(title) + '&description=' + encodeURIComponent(desc) + '&date=' + encodeURIComponent(date) + '&duration=' + encodeURIComponent(duration)
-    })
-    .then(r => r.json())
-    .then(resp => {
-      if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Session updated', 'success'); closeModal(); setTimeout(() => location.reload(), 500); }
-    })
-    .catch(err => { showToast('Failed to save session', 'error'); });
-  }
-
-  // Delete Training
-  function deleteTraining(id) {
-    if (!confirm('Delete this training session?')) return;
-    fetch('ajax/api.php?action=deleteTrainingSession', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Training deleted', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to delete', 'error'); });
-  }
-
-  // Register for Training
-  function registerForTraining(id) {
-    fetch('ajax/api.php?action=registerTraining', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Registered successfully', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to register', 'error'); });
-  }
-
-  // View Registrations
-  function viewRegistrations(id) {
-    fetch('ajax/api.php?action=getTrainingRegistrations&id=' + id)
-    .then(r => r.json())
-    .then(regs => {
-      var html = '<h3>Registrations</h3><table class="table-glass"><thead><tr><th>User</th><th>Email</th><th>Status</th></tr></thead><tbody>';
-      regs.forEach(r => { html += '<tr><td>' + r.fullName + '</td><td>' + r.email + '</td><td><span class="status-pill status-' + r.status + '">' + r.status + '</span></td></tr>'; });
-      html += '</tbody></table><button class="btn btn-outline-neon w-100 mt-3" onclick="RecLise.closeModal()">Close</button>';
-      showModal(html);
-    });
-  }
-
-  // Show Add Guide Modal
-  function showAddGuideModal() {
-    showModal('<h3>Add Guide/Coordinator</h3><form onsubmit="event.preventDefault(); RecLise.addGuide();"><div class="mb-3"><label class="form-label">Full Name</label><input type="text" class="form-control" id="guideName" required></div><div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="guideEmail" required></div><div class="mb-3"><label class="form-label">Type</label><select class="form-select" id="guideType"><option value="guide">Guide</option><option value="coordinator">Coordinator</option></select></div><button type="submit" class="btn btn-neon w-100">Add</button></form>');
-  }
-
-  // Add Guide
-  function addGuide() {
-    var name = document.getElementById('guideName').value;
-    var email = document.getElementById('guideEmail').value;
-    var type = document.getElementById('guideType').value;
-    fetch('ajax/api.php?action=addGuide', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) + '&type=' + type })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Guide added', 'success'); closeModal(); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to add guide', 'error'); });
-  }
-
-  // Edit Guide
-  function editGuide(id) {
-    fetch('ajax/api.php?action=getGuide&id=' + id)
-    .then(r => r.json())
-    .then(g => {
-      showModal('<h3>Edit Guide</h3><form onsubmit="event.preventDefault(); RecLise.saveEditGuide(' + id + ');"><div class="mb-3"><label class="form-label">Full Name</label><input type="text" class="form-control" id="editGuideName" value="' + g.fullName + '" required></div><div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" id="editGuideEmail" value="' + g.email + '" required></div><button type="submit" class="btn btn-neon w-100">Save</button></form>');
-    });
-  }
-
-  // Save Edit Guide
-  function saveEditGuide(id) {
-    var name = document.getElementById('editGuideName').value;
-    var email = document.getElementById('editGuideEmail').value;
-    fetch('ajax/api.php?action=editGuide', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id + '&name=' + encodeURIComponent(name) + '&email=' + encodeURIComponent(email) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Guide updated', 'success'); closeModal(); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to update', 'error'); });
-  }
-
-  // Delete Guide
-  function deleteGuide(id) {
-    if (!confirm('Delete this guide?')) return;
-    fetch('ajax/api.php?action=deleteGuide', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Guide deleted', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to delete', 'error'); });
-  }
-
-  // Process Request (Support)
-  function processRequest(id) {
-    fetch('ajax/api.php?action=updateRequestStatus', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id + '&status=in_progress' })
-    .then(r => r.json())
-    .then(resp => {
-      if (resp.error) { showToast(resp.error, 'error'); }
-      else { location.href = 'support/request-detail.php?id=' + id; }
-    });
-  }
-
-  // View Assist Guide
-  function viewAssistGuide(id) {
-    fetch('ajax/api.php?action=getAssistGuide&id=' + id)
-    .then(r => r.json())
-    .then(g => {
-      showModal('<h3>' + g.title + '</h3><div class="glass-card p-3 mt-2"><p>' + g.content.replace(/\n/g, '<br>') + '</p></div><button class="btn btn-outline-neon w-100 mt-3" onclick="RecLise.closeModal()">Close</button>');
-    });
-  }
-
-  // Show Add Correspondence Modal
-  function showAddCorrespondenceModal() {
-    showModal('<h3>Add Correspondence</h3><form onsubmit="event.preventDefault(); RecLise.addCorrespondence();"><div class="mb-3"><label class="form-label">Title</label><input type="text" class="form-control" id="corrTitle" required></div><div class="mb-3"><label class="form-label">Type</label><input type="text" class="form-control" id="corrType"></div><div class="mb-3"><label class="form-label">Content</label><textarea class="form-control" id="corrContent" rows="4"></textarea></div><button type="submit" class="btn btn-neon w-100">Add</button></form>');
-  }
-
-  // Add Correspondence
-  function addCorrespondence() {
-    var title = document.getElementById('corrTitle').value;
-    var type = document.getElementById('corrType').value;
-    var content = document.getElementById('corrContent').value;
-    fetch('ajax/api.php?action=addCorrespondence', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'title=' + encodeURIComponent(title) + '&type=' + encodeURIComponent(type) + '&content=' + encodeURIComponent(content) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Correspondence added', 'success'); closeModal(); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to add', 'error'); });
-  }
-
-  // Delete Correspondence
-  function deleteCorrespondence(id) {
-    if (!confirm('Delete this correspondence?')) return;
-    fetch('ajax/api.php?action=deleteCorrespondence', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Deleted', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to delete', 'error'); });
-  }
-
-  // Save Correspondence Reassign
-  function saveCorrespondenceReassign(id) {
-    var assignee = document.getElementById('reassign_' + id).value;
-    fetch('ajax/api.php?action=saveCorrespondenceReassign', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id + '&assignee=' + assignee })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Reassigned successfully', 'success'); } })
-    .catch(err => { showToast('Failed to reassign', 'error'); });
-  }
-
-  // Save Correspondence Template
-  function saveCorrespondenceTemplate(id) {
-    var template = document.getElementById('template_' + id).value;
-    fetch('ajax/api.php?action=saveCorrespondenceTemplate', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id + '&template=' + encodeURIComponent(template) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Template saved', 'success'); } })
-    .catch(err => { showToast('Failed to save', 'error'); });
-  }
-
-  // Show Add Box Modal
-  function showAddBoxModal() {
-    showModal('<h3>Add Distribution Box</h3><form onsubmit="event.preventDefault(); RecLise.addBox();"><div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" id="boxName" required></div><div class="mb-3"><label class="form-label">Location</label><input type="text" class="form-control" id="boxLocation"></div><button type="submit" class="btn btn-neon w-100">Add</button></form>');
-  }
-
-  // Add Box
-  function addBox() {
-    var name = document.getElementById('boxName').value;
-    var loc = document.getElementById('boxLocation').value;
-    fetch('ajax/api.php?action=addBox', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'name=' + encodeURIComponent(name) + '&location=' + encodeURIComponent(loc) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Box added', 'success'); closeModal(); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to add', 'error'); });
-  }
-
-  // Delete Box
-  function deleteBox(id) {
-    if (!confirm('Delete this box?')) return;
-    fetch('ajax/api.php?action=deleteBox', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Deleted', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to delete', 'error'); });
-  }
-
-  // Show Add Issue Modal
-  function showAddIssueModal() {
-    showModal('<h3>Add Technical Issue</h3><form onsubmit="event.preventDefault(); RecLise.addIssue();"><div class="mb-3"><label class="form-label">Title</label><input type="text" class="form-control" id="issueTitle" required></div><div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" id="issueDesc" rows="3"></textarea></div><div class="mb-3"><label class="form-label">Priority</label><select class="form-select" id="issuePriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div><button type="submit" class="btn btn-neon w-100">Add Issue</button></form>');
-  }
-
-  // Add Issue
-  function addIssue() {
-    var title = document.getElementById('issueTitle').value;
-    var desc = document.getElementById('issueDesc').value;
-    var priority = document.getElementById('issuePriority').value;
-    fetch('ajax/api.php?action=addTechnicalIssue', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'title=' + encodeURIComponent(title) + '&description=' + encodeURIComponent(desc) + '&priority=' + priority })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Issue added', 'success'); closeModal(); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to add', 'error'); });
-  }
-
-  // Resolve Issue
-  function resolveIssue(id) {
-    fetch('ajax/api.php?action=resolveTechnicalIssue', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Issue resolved', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to resolve', 'error'); });
-  }
-
-  // Delete Issue
-  function deleteIssue(id) {
-    if (!confirm('Delete this issue?')) return;
-    fetch('ajax/api.php?action=deleteTechnicalIssue', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Deleted', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to delete', 'error'); });
-  }
-
-  // Add Reference
-  function addRef(type) {
-    var inputId = 'refInput' + type.charAt(0).toUpperCase() + type.slice(1);
-    var val = document.getElementById(inputId).value.trim();
-    if (!val) return;
-    fetch('ajax/api.php?action=addReferential', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'type=' + type + '&value=' + encodeURIComponent(val) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { document.getElementById(inputId).value = ''; showToast('Added', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to add', 'error'); });
-  }
-
-  // Remove Reference
-  function removeRef(type, value) {
-    if (!confirm('Remove this item?')) return;
-    fetch('ajax/api.php?action=removeReferential', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'type=' + type + '&value=' + encodeURIComponent(value) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Removed', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to remove', 'error'); });
-  }
-
-  // Save Common Customization
-  function saveCommonCustomization() {
-    var cols = document.getElementById('commonColumns').value;
-    fetch('ajax/api.php?action=saveCommonCustomization', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'columns=' + encodeURIComponent(cols) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Saved', 'success'); } })
-    .catch(err => { showToast('Failed to save', 'error'); });
-  }
-
-  // Save Workflow Customization
-  function saveWorkflowCustomization() {
-    var steps = document.getElementById('workflowSteps').value;
-    fetch('ajax/api.php?action=saveWorkflowCustomization', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'steps=' + encodeURIComponent(steps) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Saved', 'success'); } })
-    .catch(err => { showToast('Failed to save', 'error'); });
-  }
-
-  // Save Dashboard Customization
-  function saveDashboardCustomization() {
-    var wr = document.getElementById('widgetRequests')?.checked ? 1 : 0;
-    var wu = document.getElementById('widgetUsers')?.checked ? 1 : 0;
-    var ws = document.getElementById('widgetStats')?.checked ? 1 : 0;
-    var wa = document.getElementById('widgetActivity')?.checked ? 1 : 0;
-    fetch('ajax/api.php?action=saveWidgetCustomization', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'widgetRequests=' + wr + '&widgetUsers=' + wu + '&widgetStats=' + ws + '&widgetActivity=' + wa })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Dashboard saved', 'success'); } })
-    .catch(err => { showToast('Failed to save', 'error'); });
-  }
-
-  // Show Reset Password Modal
-  function showResetPasswordModal(id) {
-    showModal('<h3>Reset Password</h3><form onsubmit="event.preventDefault(); RecLise.resetPassword(' + id + ');"><div class="mb-3"><label class="form-label">New Password</label><input type="password" class="form-control" id="newPassword" required minlength="6"></div><button type="submit" class="btn btn-neon w-100">Reset Password</button></form>');
-  }
-
-  // Reset Password
-  function resetPassword(id) {
-    var pw = document.getElementById('newPassword').value;
-    fetch('ajax/api.php?action=resetPassword', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id + '&password=' + encodeURIComponent(pw) })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Password reset', 'success'); closeModal(); } })
-    .catch(err => { showToast('Failed to reset', 'error'); });
-  }
-
-  // Approve Registration
-  function approveRegistration(id) {
-    if (!confirm('Approve this registration?')) return;
-    fetch('ajax/api.php?action=approveRegistration', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Approved', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed', 'error'); });
-  }
-
-  // Reject Registration
-  function rejectRegistration(id) {
-    if (!confirm('Reject this registration?')) return;
-    fetch('ajax/api.php?action=rejectRegistration', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Rejected', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed', 'error'); });
-  }
-
-  // Show Delegate Modal
-  function showDelegateModal(id) {
-    showModal('<h3>Delegate Role</h3><form onsubmit="event.preventDefault(); RecLise.delegateRole(' + id + ');"><div class="mb-3"><label class="form-label">New Role</label><select class="form-select" id="newRole"><option value="user">Final User</option><option value="support">Support Team</option><option value="admin">Administrator</option></select></div><button type="submit" class="btn btn-neon w-100">Update Role</button></form>');
-  }
-
-  // Delegate Role
-  function delegateRole(id) {
-    var role = document.getElementById('newRole').value;
-    fetch('ajax/api.php?action=delegateRole', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id + '&role=' + role })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Role updated', 'success'); closeModal(); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to update', 'error'); });
-  }
-
-  // Show Resolve Escalated Modal
-  function showResolveEscalatedModal(id) {
-    if (!confirm('Mark this escalated request as resolved?')) return;
-    fetch('ajax/api.php?action=updateRequestStatus', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id + '&status=resolved' })
-    .then(r => r.json())
-    .then(resp => { if (resp.error) { showToast(resp.error, 'error'); } else { showToast('Resolved', 'success'); setTimeout(() => location.reload(), 500); } })
-    .catch(err => { showToast('Failed to resolve', 'error'); });
-  }
-
-  // Render Content (history/audit log tabs)
-  function renderContent(tab) {
-    fetch('ajax/api.php?action=getContent&tab=' + tab)
-    .then(r => r.json())
-    .then(data => {
-      document.getElementById(tab + 'Content').innerHTML = data.html;
-    });
-  }
-
-  return {
-    toggleTheme,
-    toggleLangMenu,
-    setLanguage,
-    toggleSidebar,
-    showToast,
-    closeModal,
-    filterUsers,
-    filterByStatus,
-    scrollToReply,
-    sendUserMessage,
-    submitNewRequest,
-    viewRequestDetail,
-    showAddUserModal,
-    addUser,
-    showEditUserModal,
-    editUser,
-    deleteUser,
-    handleLogout,
-    showAddTrainingModal,
-    addTraining,
-    editTraining,
-    deleteTraining,
-    registerForTraining,
-    viewRegistrations,
-    showAddGuideModal,
-    addGuide,
-    editGuide,
-    saveEditGuide,
-    deleteGuide,
-    showAddCorrespondenceModal,
-    addCorrespondence,
-    deleteCorrespondence,
-    showAddBoxModal,
-    addBox,
-    deleteBox,
-    showAddIssueModal,
-    addIssue,
-    resolveIssue,
-    deleteIssue,
-    addRef,
-    removeRef,
-    saveCommonCustomization,
-    saveWorkflowCustomization,
-    saveDashboardCustomization,
-    showResetPasswordModal,
-    resetPassword,
-    approveRegistration,
-    rejectRegistration,
-    renderContent,
-    saveEditSession,
-    showDelegateModal,
-    delegateRole,
-    viewAssistGuide,
-    deleteGuideConfirm: deleteGuide,
-    processRequest,
-    saveCorrespondenceReassign,
-    saveCorrespondenceTemplate,
-    showResolveEscalatedModal,
-    viewResolvedRequest: viewRequestDetail
-  };
+   return {
+      toggleTheme,
+      toggleLangMenu,
+      toggleNotifMenu,
+      markNotificationsRead,
+      setLanguage,
+      toggleSidebar,
+      handleLogout,
+      showToast,
+      closeModal,
+      submitNewRequest,
+      submitSupportRequest,
+      viewRequestDetail,
+      editRequest,
+      saveEditRequest,
+      deleteRequest,
+      processRequest,
+      showAddTrainingModal,
+      doAddTraining,
+      editTraining,
+      updateTraining,
+      deleteTraining,
+     deleteTrainingConfirm,
+     registerForTraining,
+     unregisterFromTraining,
+     viewRegistrations,
+     showAddGuideModal,
+     submitGuide,
+     editGuide,
+     updateGuide,
+      deleteGuide,
+      deleteGuideConfirm,
+      filterByStatus,
+      viewAssistGuide,
+      viewResolvedRequest,
+      showReplyModal,
+      submitReply,
+      sendReply,
+      escalateToAdmin,
+      saveDashboard,
+      renderContent,
+      showAttachments,
+      showAddTrainingModal,
+      doAddTraining
+    };
 })();
+
+
+
+
+

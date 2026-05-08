@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS requests (
   status            ENUM('new', 'in_progress', 'resolved', 'escalated', 'closed') NOT NULL DEFAULT 'new',
   assigned_to       INT           DEFAULT NULL,
   escalated_to_admin TINYINT(1)   NOT NULL DEFAULT 0,
+  request_from      ENUM('user', 'support') NOT NULL DEFAULT 'user',
   support_response  TEXT          DEFAULT NULL,
   closure_motive    VARCHAR(255)  DEFAULT NULL,
   created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -119,7 +120,7 @@ CREATE TABLE IF NOT EXISTS training_sessions (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   title         VARCHAR(255)  NOT NULL,
   description   TEXT          DEFAULT NULL,
-  date          DATE          NOT NULL,
+  session_date  DATE          NOT NULL,
   duration      INT           DEFAULT 1,
   created_by    INT           DEFAULT NULL,
   created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -132,15 +133,15 @@ CREATE TABLE IF NOT EXISTS training_sessions (
 -- 2.6b TRAINING REGISTRATIONS
 -- Connects users to training sessions.
 -- ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS training_registrations (
+CREATE TABLE IF NOT EXISTS user_training_registrations (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   user_id       INT      NOT NULL,
   session_id    INT      NOT NULL,
   status        ENUM('registered', 'cancelled', 'attended') NOT NULL DEFAULT 'registered',
   registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-  CONSTRAINT fk_trainreg_user    FOREIGN KEY (user_id)    REFERENCES users(id)              ON DELETE CASCADE,
-  CONSTRAINT fk_trainreg_session FOREIGN KEY (session_id) REFERENCES training_sessions(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_utr_user    FOREIGN KEY (user_id)    REFERENCES users(id)              ON DELETE CASCADE,
+  CONSTRAINT fk_utr_session FOREIGN KEY (session_id) REFERENCES training_sessions(id)  ON DELETE CASCADE,
   UNIQUE KEY uq_user_session (user_id, session_id)
 ) ENGINE=InnoDB;
 
@@ -225,13 +226,6 @@ CREATE TABLE IF NOT EXISTS distribution_boxes (
   created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS distribution_box_members (
-  id            INT AUTO_INCREMENT PRIMARY KEY,
-  box_id        INT           NOT NULL,
-  member_name   VARCHAR(255)  NOT NULL,
-  CONSTRAINT fk_box_member FOREIGN KEY (box_id) REFERENCES distribution_boxes(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
 
 -- ------------------------------------------------------------
 -- 2.12 DISTRIBUTION BOX MEMBERS
@@ -296,6 +290,30 @@ CREATE TABLE IF NOT EXISTS user_registrations (
   reviewed_by INT          DEFAULT NULL,
 
   CONSTRAINT fk_reg_reviewer FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+
+-- ------------------------------------------------------------
+-- 2.15b REF SUB-TASKS
+-- Used in admin/references.php and customization.php
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS ref_sub_tasks (
+  id    INT AUTO_INCREMENT PRIMARY KEY,
+  label VARCHAR(255) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+
+-- ------------------------------------------------------------
+-- 2.15c USER PAGE HISTORY
+-- Tracks recent page visits for quick actions navigation
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS user_page_history (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  user_id    INT           NOT NULL,
+  page       VARCHAR(100)  NOT NULL,
+  visited_at DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 
@@ -433,7 +451,7 @@ INSERT INTO audit_logs (id, action, user_id, details, created_at) VALUES
 
 
 -- 4.6 Training Sessions
-INSERT INTO training_sessions (id, title, description, date, duration, created_by) VALUES
+INSERT INTO training_sessions (id, title, description, session_date, duration, created_by) VALUES
   (1, 'Introduction à ELISSA',            'Formation de base pour les nouveaux utilisateurs du système ELISSA.', '2025-05-10', 3, 2),
   (2, 'Gestion avancée des courriers',    'Fonctionnalités avancées: modèles, signatures, workflow.',            '2025-05-15', 4, 2);
 
@@ -445,7 +463,7 @@ INSERT INTO assist_guides (id, title, content, category) VALUES
 
 
 -- 4.8 Correspondences
-INSERT INTO correspondences (id, title, type, content, created_by) VALUES
+INSERT INTO correspondences (id, name, type, content, created_by) VALUES
   (1, 'Note de service',   'Interne', '', 2),
   (2, 'Lettre officielle', 'Externe', '', 2),
   (3, 'Circulaire',        'Interne', '', 2);
@@ -560,11 +578,11 @@ CREATE OR REPLACE VIEW v_training_summary AS
 SELECT
   t.id,
   t.title,
-  t.date,
+  t.session_date,
   t.duration,
   COUNT(tr.user_id)                 AS registered_count
 FROM training_sessions t
-  LEFT JOIN training_registrations tr ON t.id = tr.session_id AND tr.status = 'registered'
+  LEFT JOIN user_training_registrations tr ON t.id = tr.session_id AND tr.status = 'registered'
 GROUP BY t.id;
 
 
