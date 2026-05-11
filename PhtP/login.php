@@ -28,8 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = t('accountInactive');
             } else {
                 Auth::login($user);
+                $role = $user['role'] ?? 'user';
                 $stmt = $pdo->prepare("INSERT INTO audit_logs (action, user_id, details) VALUES ('LOGIN', ?, ?)");
-                $stmt->execute([$user['id'], 'User logged in']);
+                $stmt->execute([$user['id'], $role . ' logged in']);
                 Auth::redirectByRole();
             }
         } else {
@@ -43,12 +44,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<base href="<?= Auth::getBaseUrl() ?>">
+<!-- base tag removed - using absolute paths -->
 <meta name="description" content="RecLise - Connexion - ELISSA Support Platform.">
 <title>RecLise — <?php echo t('login'); ?></title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="assets/css/styles.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/pfeeeee/PhtP/assets/css/styles.css" rel="stylesheet">
+<style>
+[data-bs-theme="dark"] .login-box .logo-image {
+    filter: brightness(0) invert(1);
+}
+.login-actions { display: flex; justify-content: center; gap: 12px; }
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-icon:hover {
+    color: var(--neon-accent);
+    border-color: rgba(var(--brand-accent-rgb), 0.3);
+}
+.dropdown-menu {
+    background: var(--modal-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.dropdown-item {
+    color: var(--text-primary);
+}
+.dropdown-item:hover {
+    background: rgba(var(--brand-accent-rgb), 0.1);
+    color: var(--neon-accent);
+}
+</style>
 </head>
 <body class="<?= ($lang === 'ar' ? 'rtl' : '') ?>">
 <canvas id="particleCanvas"></canvas>
@@ -63,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="loginPage">
 <div class="login-container">
 <div class="login-box">
-<img src="assets/images/Untitled-1rg.png" alt="Logo" class="logo-image" />
+<img src="/pfeeeee/Untitled-1.png" alt="Logo" class="logo-image" />
 <p class="subtitle" id="loginSubtitle"><?php echo t('welcome'); ?> — ELISSA Support Platform — MESRS</p>
 <form id="loginForm" method="POST" action="login.php?lang=<?php echo $lang; ?>" autocomplete="off">
 <div class="mb-3 text-start">
@@ -82,17 +119,65 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="dropdown">
 <button class="btn-icon" id="loginLangBtn" data-bs-toggle="dropdown" aria-expanded="false" title="<?php echo t('changeLang'); ?>"><i class="fas fa-globe"></i></button>
 <ul class="dropdown-menu">
-<li><a class="dropdown-item" href="login.php?lang=fr">Français</a></li>
-<li><a class="dropdown-item" href="login.php?lang=en">English</a></li>
-<li><a class="dropdown-item" href="login.php?lang=ar">العربية</a></li>
+<li><a class="dropdown-item" href="?lang=fr">Français (FR)</a></li>
+<li><a class="dropdown-item" href="?lang=en">English (EN)</a></li>
+<li><a class="dropdown-item" href="?lang=ar">العربية (AR)</a></li>
 </ul>
 </div>
-<button class="btn-icon" onclick="toggleTheme()" title="<?php echo t('toggleTheme'); ?>"><i class="fas fa-moon" id="themeIconLogin"></i></button>
+<button class="btn-icon" id="loginThemeBtn" onclick="toggleTheme()" title="<?php echo t('toggleTheme'); ?>"><i class="fas fa-moon" id="themeIconLogin"></i></button>
 </div>
 </div>
 </div>
 </div>
+<canvas id="loginParticles"></canvas>
+
+<!-- Request Access Modal -->
+<div class="modal fade" id="requestAccessModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--card-bg);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title" style="color:var(--text-primary);"><i class="fas fa-user-plus me-2"></i>Request Access</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="requestAccessForm">
+          <div class="mb-3">
+            <label class="form-label" style="color:var(--text-secondary);">Full Name</label>
+            <input type="text" class="form-control" name="full_name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="color:var(--text-secondary);">Email</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="color:var(--text-secondary);">Department</label>
+            <input type="text" class="form-control" name="department" required>
+          </div>
+          <button type="submit" class="btn btn-neon w-100">Submit Request</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.getElementById('requestAccessForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    fd.append('action', 'requestAccess');
+    fetch('/pfeeeee/PhtP/ajax/api.php', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(d => {
+        if(d.success) {
+          alert('Access requested successfully! Wait for admin approval.');
+          bootstrap.Modal.getInstance(document.getElementById('requestAccessModal')).hide();
+        } else {
+          alert(d.error || 'Failed to request access');
+        }
+      });
+  });
+</script>
 <script>
 let theme = 'dark';
 function toggleTheme() {
@@ -110,11 +195,11 @@ function showToast(message, type) {
     setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 300); }, 3500);
 }
 function initBackgroundAnimation() {
-    var cvs = document.getElementById('particleCanvas');
-    if (!cvs) return;
-    var pctx = cvs.getContext('2d');
+    var canvas = document.getElementById('particleCanvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
     var pts = [], W, H;
-    function resize() { W = cvs.width = window.innerWidth; H = cvs.height = window.innerHeight; }
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
     resize();
     window.addEventListener('resize', function() { resize(); initPts(); });
     function Pt() {
@@ -130,13 +215,13 @@ function initBackgroundAnimation() {
         };
         this.draw = function() {
             var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-            pctx.beginPath();
-            pctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-            pctx.fillStyle = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(2,92,132,0.9)';
-            pctx.shadowBlur = 10;
-            pctx.shadowColor = isDark ? '#FFFFFF' : '#025C84';
-            pctx.fill();
-            pctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(2,92,132,0.9)';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = isDark ? '#FFFFFF' : '#025C84';
+            ctx.fill();
+            ctx.shadowBlur = 0;
         };
     }
     function initPts() {
@@ -155,18 +240,18 @@ function initBackgroundAnimation() {
                 var dy = pts[i].y - pts[j].y;
                 var d = Math.sqrt(dx * dx + dy * dy);
                 if (d < LDIST) {
-                    pctx.beginPath();
-                    pctx.moveTo(pts[i].x, pts[i].y);
-                    pctx.lineTo(pts[j].x, pts[j].y);
-                    pctx.strokeStyle = 'rgba(' + base + (1 - d / LDIST) * 0.45 + ')';
-                    pctx.lineWidth = 0.8;
-                    pctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(pts[i].x, pts[i].y);
+                    ctx.lineTo(pts[j].x, pts[j].y);
+                    ctx.strokeStyle = 'rgba(' + base + (1 - d / LDIST) * 0.45 + ')';
+                    ctx.lineWidth = 0.8;
+                    ctx.stroke();
                 }
             }
         }
     }
     function loop() {
-        pctx.clearRect(0, 0, W, H);
+        ctx.clearRect(0, 0, W, H);
         pts.forEach(function(p) { p.step(); p.draw(); });
         drawLinks();
         requestAnimationFrame(loop);

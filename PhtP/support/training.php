@@ -2,11 +2,12 @@
 $currentView = 'training';
 require_once '../includes/header.php';
 
-// Fetch training sessions
-$sessions = to_camel_all($pdo->query("SELECT *, 
-    (SELECT COUNT(*) FROM training_registrations WHERE session_id = training_sessions.id) as registered_count 
-    FROM training_sessions 
-    ORDER BY date ASC")->fetchAll());
+// Fetch training sessions with registration count
+$sessions = to_camel_all($pdo->query("
+    SELECT t.*, 
+           (SELECT COUNT(*) FROM user_training_registrations WHERE session_id = t.id) as registered_count 
+    FROM training_sessions t 
+    ORDER BY t.session_date ASC")->fetchAll());
 ?>
 
 <div class="section-header">
@@ -17,7 +18,7 @@ $sessions = to_camel_all($pdo->query("SELECT *,
 </div>
 
 <?php if (empty($sessions)): ?>
-  <p class="text-secondary text-center padding:40px;"><?php echo t('noResults'); ?></p>
+  <p class="text-secondary text-center p-4"><?php echo t('noResults'); ?></p>
 <?php else: ?>
   <div class="row g-3">
     <?php foreach ($sessions as $session): ?>
@@ -28,17 +29,17 @@ $sessions = to_camel_all($pdo->query("SELECT *,
           <div class="flex-space-between align-items-center margin-bottom-12">
             <small class="text-secondary">
               <i class="fas fa-calendar me-1"></i>
-              <?= date('Y-m-d H:i', strtotime($session['date'])) ?>
+              <?= $session['sessionDate'] ? date('Y-m-d H:i', strtotime($session['sessionDate'])) : 'N/A' ?>
             </small>
             <span class="chip">
-              <i class="fas fa-users me-1"></i><?= $session['registered_count'] ?> <?php echo t('registered'); ?>
+              <i class="fas fa-users me-1"></i><?= $session['registeredCount'] ?> <?php echo t('registered'); ?>
             </span>
           </div>
           <div class="flex-gap-4">
             <button class="btn btn-outline-neon btn-sm" onclick="RecLise.editTraining(<?= $session['id'] ?>)">
               <i class="fas fa-edit"></i>
             </button>
-            <button class="btn btn-danger btn-sm" onclick="RecLise.deleteTraining(<?= $session['id'] ?>)">
+            <button class="btn btn-danger btn-sm" onclick="RecLise.deleteTrainingConfirm(<?= $session['id'] ?>)">
               <i class="fas fa-trash"></i>
             </button>
             <button class="btn btn-outline-neon btn-sm" onclick="RecLise.viewRegistrations(<?= $session['id'] ?>)">

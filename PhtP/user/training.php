@@ -4,12 +4,12 @@ require_once '../includes/header.php';
 
 // Fetch training sessions
 $sessions = to_camel_all($pdo->query("SELECT *, 
-    (SELECT COUNT(*) FROM training_registrations WHERE session_id = training_sessions.id) as registered_count 
+    (SELECT COUNT(*) FROM user_training_registrations WHERE session_id = training_sessions.id) as registered_count 
     FROM training_sessions 
-    ORDER BY date ASC")->fetchAll());
+    ORDER BY session_date ASC")->fetchAll());
 
 // Check user registrations
-$userRegs = $pdo->query("SELECT session_id FROM training_registrations WHERE user_id = {$_SESSION['user_id']}")->fetchAll(PDO::FETCH_COLUMN);
+$userRegs = $pdo->query("SELECT session_id FROM user_training_registrations WHERE user_id = {$_SESSION['user_id']}")->fetchAll(PDO::FETCH_COLUMN);
 ?>
 
 <div class="section-header">
@@ -28,15 +28,15 @@ $userRegs = $pdo->query("SELECT session_id FROM training_registrations WHERE use
           <div class="flex-space-between align-items-center margin-bottom-12">
             <small class="text-secondary">
               <i class="fas fa-calendar me-1"></i>
-              <?= date('Y-m-d H:i', strtotime($session['date'])) ?>
+              <?= date('Y-m-d H:i', strtotime($session['sessionDate'])) ?>
             </small>
             <span class="chip">
-              <i class="fas fa-users me-1"></i><?= $session['registered_count'] ?> <?php echo t('registered'); ?>
+              <i class="fas fa-users me-1"></i><?= $session['registeredCount'] ?> <?php echo t('registered'); ?>
             </span>
           </div>
           <?php if (in_array($session['id'], $userRegs)): ?>
-            <button class="btn btn-outline-neon w-100" onclick="RecLise.registerForTraining(<?= $session['id'] ?>)">
-              <i class="fas fa-check me-1"></i><?php echo t('registered'); ?>
+            <button class="btn btn-outline-neon w-100" onclick="RecLise.unregisterFromTraining(<?= $session['id'] ?>)">
+              <i class="fas fa-times me-1"></i><?php echo t('unregister'); ?>
             </button>
           <?php else: ?>
             <button class="btn btn-neon w-100" onclick="RecLise.registerForTraining(<?= $session['id'] ?>)">

@@ -85,11 +85,14 @@ $recentLogs = to_camel_all($stmtLogs->fetchAll());
     <div class="glass-card" style="padding: 16px;">
       <h5 style="margin-bottom: 16px;"><?php echo t('recentActivity'); ?></h5>
       <?php if (empty($recentLogs)): ?>
-        <p style="color:var(--text-secondary);"><?php echo t('noResults'); ?></p>
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p><?php echo t('noResults'); ?></p>
+        </div>
       <?php else: ?>
         <?php foreach ($recentLogs as $log): ?>
           <div class="activity-item">
-            <div class="activity-dot" style="background:var(--neon-accent)"></div>
+            <div class="activity-dot"></div>
             <div>
               <div class="activity-text"><strong><?= htmlspecialchars($log['action']) ?></strong> — <?= htmlspecialchars($log['details']) ?></div>
               <div class="activity-time"><?= date('M d, H:i', strtotime($log['createdAt'])) ?></div>
@@ -100,15 +103,31 @@ $recentLogs = to_camel_all($stmtLogs->fetchAll());
     </div>
   </div>
 
-  <!-- Quick Actions -->
+  <!-- Quick Actions (Last 3 Visited Pages) -->
   <div class="col-md-6">
     <div class="glass-card" style="padding: 16px;">
       <h5 style="margin-bottom: 16px;"><?php echo t('quickActions'); ?></h5>
-      <div class="d-grid gap-2">
-        <a href="users.php" class="btn btn-outline-neon text-start"><i class="fas fa-users-gear me-2"></i><?php echo t('userManagement'); ?></a>
-        <a href="escalated-requests.php" class="btn btn-outline-neon text-start"><i class="fas fa-arrow-up-right-dots me-2"></i><?php echo t('escalatedRequests'); ?></a>
-        <a href="statistics.php" class="btn btn-outline-neon text-start"><i class="fas fa-chart-pie me-2"></i><?php echo t('statistics'); ?></a>
-      </div>
+      <?php
+      $recentPages = $_SESSION['recent_pages'] ?? [];
+      $role = $_SESSION['role'];
+      if (empty($recentPages)):
+      ?>
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p><?php echo t('noResults'); ?></p>
+        </div>
+      <?php else: ?>
+        <div class="d-grid gap-2">
+          <?php foreach ($recentPages as $page): ?>
+            <a href="/pfeeeee/PhtP/<?= $role ?>/<?= $page ?>.php" class="btn btn-outline-neon text-center">
+              <i class="fas <?php
+                $icons = ['dashboard'=>'fa-gauge-high','users'=>'fa-users-gear','escalated-requests'=>'fa-arrow-up-right-dots','correspondences'=>'fa-file-lines','references'=>'fa-tags','distribution-boxes'=>'fa-boxes-stacked','technical-issues'=>'fa-bug','customization'=>'fa-sliders','statistics'=>'fa-chart-pie','audit-logs'=>'fa-scroll','system-settings'=>'fa-gear'];
+                echo $icons[$page] ?? 'fa-circle';
+              ?> me-2"></i><?php echo t($page); ?>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 </div>

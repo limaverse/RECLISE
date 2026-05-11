@@ -4,65 +4,78 @@ require_once '../includes/header.php';
 
 // Fetch statistics
 $totalRequests = $pdo->query("SELECT COUNT(*) FROM requests")->fetchColumn();
-$byStatus = $pdo->query("SELECT status, COUNT(*) as cnt FROM requests GROUP BY status")->fetchAll();
 $byType = $pdo->query("SELECT type, COUNT(*) as cnt FROM requests GROUP BY type")->fetchAll();
 $byCategory = $pdo->query("SELECT category, COUNT(*) as cnt FROM requests GROUP BY category")->fetchAll();
+$byDept = $pdo->query("SELECT u.department, COUNT(*) as cnt FROM requests r LEFT JOIN users u ON r.user_id = u.id GROUP BY u.department")->fetchAll();
 ?>
 
 <div class="section-header">
   <h2><i class="fas fa-chart-bar me-2"></i><?php echo t('statistics'); ?></h2>
 </div>
 
-<!-- Summary Cards -->
-<div class="row g-3 mb-4">
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon"><i class="fas fa-inbox"></i></div>
-      <div class="stat-value"><?= $totalRequests ?></div>
-      <div class="stat-label"><?php echo t('totalRequests'); ?></div>
+<div class="row g-3">
+  <!-- By Type -->
+  <div class="col-md-4">
+    <div class="glass-card" style="padding:20px;">
+      <h5 class="mb-4"><i class="fas fa-chart-pie me-2" style="color:var(--icon-color);"></i><?php echo t('requestsByType'); ?></h5>
+      <?php
+      $typeMap = ['request' => ['color' => '#3B82F6', 'label' => t('request')], 'complaint' => ['color' => '#EF4444', 'label' => t('complaint')]];
+      foreach ($typeMap as $type => $info):
+        $cnt = 0;
+        foreach ($byType as $row) { if ($row['type'] === $type) { $cnt = $row['cnt']; break; } }
+        $pct = $totalRequests > 0 ? round(($cnt / $totalRequests) * 100) : 0;
+      ?>
+        <div class="mb-3">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.25rem;">
+            <span><?= $info['label'] ?></span>
+            <span><?= $cnt ?> (<?= $pct ?>%)</span>
+          </div>
+          <div class="progress-custom"><div class="bar-fill" style="width:<?= $pct ?>%;background:<?= $info['color'] ?>;"></div></div>
+        </div>
+      <?php endforeach; ?>
     </div>
   </div>
-</div>
 
-<!-- By Status -->
-<div class="glass-card mb-3" style="padding:20px;">
-  <h5 class="mb-3"><?php echo t('requestsByStatus'); ?></h5>
-  <div class="bar-chart">
-    <?php foreach ($byStatus as $row): ?>
-      <div class="bar-col">
-        <div class="bar-value"><?= $row['cnt'] ?></div>
-        <div class="bar" style="height: <?= $row['cnt'] * 20 ?>px; background: var(--<?= $row['status'] === 'new' ? 'warning' : ($row['status'] === 'resolved' ? 'success' : 'info') ?>);"></div>
-        <div class="bar-label"><?php echo t_status($row['status']); ?></div>
-      </div>
-    <?php endforeach; ?>
+  <!-- By Category -->
+  <div class="col-md-4">
+    <div class="glass-card" style="padding:20px;">
+      <h5 class="mb-4"><i class="fas fa-tags me-2" style="color:var(--icon-color);"></i><?php echo t('requestsByCategory'); ?></h5>
+      <?php
+      $catMap = ['technical' => ['color' => '#F59E0B', 'label' => t('technical')], 'access' => ['color' => '#10B981', 'label' => t('access')], 'training' => ['color' => '#8B5CF6', 'label' => t('training')]];
+      foreach ($catMap as $cat => $info):
+        $cnt = 0;
+        foreach ($byCategory as $row) { if ($row['category'] === $cat) { $cnt = $row['cnt']; break; } }
+        $pct = $totalRequests > 0 ? round(($cnt / $totalRequests) * 100) : 0;
+      ?>
+        <div class="mb-3">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.25rem;">
+            <span><?= $info['label'] ?></span>
+            <span><?= $cnt ?> (<?= $pct ?>%)</span>
+          </div>
+          <div class="progress-custom"><div class="bar-fill" style="width:<?= $pct ?>%;background:<?= $info['color'] ?>;"></div></div>
+        </div>
+      <?php endforeach; ?>
+    </div>
   </div>
-</div>
 
-<!-- By Type -->
-<div class="glass-card mb-3" style="padding:20px;">
-  <h5 class="mb-3"><?php echo t('requestsByType'); ?></h5>
-  <div class="bar-chart">
-    <?php foreach ($byType as $row): ?>
-      <div class="bar-col">
-        <div class="bar-value"><?= $row['cnt'] ?></div>
-        <div class="bar" style="height: <?= $row['cnt'] * 20 ?>px;"></div>
-        <div class="bar-label"><?php echo t($row['type']); ?></div>
-      </div>
-    <?php endforeach; ?>
-  </div>
-</div>
-
-<!-- By Category -->
-<div class="glass-card" style="padding:20px;">
-  <h5 class="mb-3"><?php echo t('requestsByCategory'); ?></h5>
-  <div class="bar-chart">
-    <?php foreach ($byCategory as $row): ?>
-      <div class="bar-col">
-        <div class="bar-value"><?= $row['cnt'] ?></div>
-        <div class="bar" style="height: <?= $row['cnt'] * 20 ?>px;"></div>
-        <div class="bar-label"><?php echo t($row['category']); ?></div>
-      </div>
-    <?php endforeach; ?>
+  <!-- By Department -->
+  <div class="col-md-4">
+    <div class="glass-card" style="padding:20px;">
+      <h5 class="mb-4"><i class="fas fa-building me-2" style="color:var(--icon-color);"></i><?php echo t('requestsByDept'); ?></h5>
+      <?php foreach ($byDept as $row):
+        $dept = $row['department'] ? $row['department'] : 'Unknown';
+        $cnt = $row['cnt'];
+        $pct = $totalRequests > 0 ? round(($cnt / $totalRequests) * 100) : 0;
+        ?>
+        <div class="mb-3">
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.25rem;">
+            <span><?= htmlspecialchars($dept) ?></span>
+            <span><?= $cnt ?> (<?= $pct ?>%)</span>
+          </div>
+          <div class="progress-custom"><div class="bar-fill" style="width:<?= $pct ?>%;background:var(--neon-accent);"></div></div>
+        </div>
+      <?php endforeach; ?>
+    </div>
   </div>
 </div>
 

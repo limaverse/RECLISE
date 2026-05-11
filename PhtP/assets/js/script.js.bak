@@ -1,0 +1,677 @@
+const RecLise = (function () {
+  'use strict';
+
+  // Initialize
+  function init() {
+    const theme = document.documentElement.getAttribute('data-bs-theme') || 'dark';
+    
+    // Initialize tooltips
+    if (typeof bootstrap !== 'undefined') {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    }
+
+    // Initialize background animation
+    initBackgroundAnimation();
+  }
+
+  function initBackgroundAnimation() {
+    const cvs = document.getElementById('particleCanvas');
+    if (!cvs) return;
+    const pctx = cvs.getContext('2d');
+    let pts = [], W, H;
+
+    function resize() {
+      W = cvs.width = window.innerWidth;
+      H = cvs.height = window.innerHeight;
+    }
+
+    resize();
+    window.addEventListener('resize', () => { resize(); initPts(); });
+
+    class Pt {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * W;
+        this.y = Math.random() * H;
+        this.vx = (Math.random() - .5) * .48;
+        this.vy = (Math.random() - .5) * .48;
+        this.r = Math.random() * 1.8 + 0.6;
+      }
+      step() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > W) this.vx *= -1;
+        if (this.y < 0 || this.y > H) this.vy *= -1;
+      }
+      draw() {
+        const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        pctx.beginPath(); pctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        const color = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(2, 92, 132, 0.9)';
+        pctx.fillStyle = color;
+        pctx.shadowBlur = 10;
+        pctx.shadowColor = isDark ? '#FFFFFF' : '#025C84';
+        pctx.fill();
+        pctx.shadowBlur = 0;
+      }
+    }
+
+    function initPts() {
+      pts = [];
+      const n = Math.min(Math.floor(W * H / 8000), 130);
+      for (let i = 0; i < n; i++) pts.push(new Pt());
+    }
+
+    initPts();
+
+    const LDIST = 155;
+    function drawLinks() {
+      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const base = isDark ? '255, 255, 255,' : '2, 92, 132,';
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y, d = Math.sqrt(dx * dx + dy * dy);
+          if (d < LDIST) {
+            pctx.beginPath(); pctx.moveTo(pts[i].x, pts[i].y); pctx.lineTo(pts[j].x, pts[j].y);
+            pctx.strokeStyle = `rgba(${base}${(1 - d / LDIST) * 0.45})`;
+            pctx.lineWidth = 0.8; pctx.stroke();
+          }
+        }
+      }
+    }
+
+    function loop() {
+      pctx.clearRect(0, 0, W, H);
+      pts.forEach(p => { p.step(); p.draw(); });
+      drawLinks();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  }
+
+  // Theme toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-bs-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-bs-theme', next);
+    
+    const icon = document.getElementById('themeIcon');
+    if (icon) {
+      icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    
+    // Save preference
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=setTheme', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'theme=' + next
+    }).catch(err => console.error('Failed to save theme:', err));
+  }
+
+  // Language toggle
+  function toggleLangMenu() {
+    const menu = document.getElementById('langMenu');
+    if (menu) menu.classList.toggle('show');
+  }
+
+  function setLanguage(lang) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = '<input type="hidden" name="set_language" value="' + lang + '">';
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  // Sidebar toggle (mobile)
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar) sidebar.classList.toggle('show');
+    if (overlay) overlay.classList.toggle('show');
+  }
+
+  // Toast notification
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg ' + type;
+    toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle') + ' me-2"></i>' + message;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
+  // Close modal
+  function closeModal() {
+    const overlay = document.querySelector('.modal-overlay');
+    if (overlay) overlay.remove();
+  }
+
+  // Filter users table
+  function filterUsers(value) {
+    const table = document.getElementById('usersTable');
+    if (!table) return;
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(value.toLowerCase()) ? '' : 'none';
+    });
+  }
+
+  // Filter by status
+  function filterByStatus() {
+    const select = document.getElementById('statusFilter');
+    if (!select) return;
+    const status = select.value;
+    const rows = document.querySelectorAll('tbody tr[data-status]');
+    rows.forEach(row => {
+      if (!status) {
+        row.style.display = '';
+      } else {
+        row.style.display = row.getAttribute('data-status') === status ? '' : 'none';
+      }
+    });
+  }
+
+  // Scroll to reply section
+  function scrollToReply(reqId) {
+    const target = document.getElementById('reqMsg-' + reqId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    const select = document.getElementById('messageRequestSelect');
+    if (select) select.value = reqId;
+    const replyBox = document.getElementById('messageText') || document.getElementById('messageText');
+    if (replyBox) replyBox.focus();
+  }
+
+  // Send user message (from messages page)
+  function sendUserMessage() {
+    const reqId = parseInt(document.getElementById('messageRequestSelect')?.value);
+    if (!reqId) {
+      showToast('Please select a request', 'error');
+      return;
+    }
+    const text = document.getElementById('messageText')?.value.trim();
+    if (!text) {
+      showToast('Please type a message', 'error');
+      return;
+    }
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=replyToRequest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'id=' + reqId + '&body=' + encodeURIComponent(text)
+    })
+    .then(r => r.json())
+    .then(resp => {
+      if (resp.error) {
+        showToast(resp.error, 'error');
+      } else {
+        showToast('Message sent successfully', 'success');
+        const replyBox = document.getElementById('messageText');
+        if (replyBox) replyBox.value = '';
+        setTimeout(() => location.reload(), 500);
+      }
+    })
+    .catch(err => {
+      showToast('Failed to send message', 'error');
+      console.error(err);
+    });
+  }
+
+  // Submit new request
+  function submitNewRequest() {
+    const type = document.getElementById('reqType')?.value;
+    const title = document.getElementById('reqTitle')?.value.trim();
+    const category = document.getElementById('reqCategory')?.value;
+    const priority = document.getElementById('reqPriority')?.value;
+    const desc = document.getElementById('reqDesc')?.value.trim();
+    
+    if (!title || !desc) {
+      showToast('Please fill required fields', 'error');
+      return;
+    }
+    
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=createRequest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'type=' + type + '&title=' + encodeURIComponent(title) + '&category=' + category + '&priority=' + priority + '&description=' + encodeURIComponent(desc)
+    })
+    .then(r => r.json())
+    .then(resp => {
+      if (resp.error) {
+        showToast(resp.error, 'error');
+      } else {
+        showToast('Request created successfully', 'success');
+        setTimeout(() => window.location.href = 'track-status.php', 500);
+      }
+    })
+    .catch(err => {
+      showToast('Failed to create request', 'error');
+      console.error(err);
+    });
+  }
+
+    // View Request Detail (rich version like support_reclise.html)
+    function viewRequestDetail(id) {
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=getRequest&id=' + id)
+      .then(r => r.json())
+      .then(req => {
+        if (req.error) { showToast(req.error, 'error'); return; }
+
+        const user = req.requester_name ? { fullName: req.requester_name, email: req.requester_email } : null;
+        const statusClass = 'status-' + (req.status || 'new').replace('_', '-');
+        const statusLabel = req.status === 'new' ? 'New' : req.status === 'in_progress' ? 'In Progress' : req.status === 'resolved' ? 'Resolved' : req.status === 'escalated' ? 'Escalated' : 'New';
+        const typeIcon = req.type === 'complaint' ? 'fa-exclamation-triangle' : 'fa-question-circle';
+        const typeLabel = req.type === 'complaint' ? 'Complaint' : 'Request';
+
+        // Build messages timeline
+        let messagesHtml = '';
+        if (req.messages && req.messages.length) {
+          req.messages.forEach(msg => {
+            const senderType = msg.sender_type || 'user';
+            const icon = senderType === 'user' ? 'user' : (senderType === 'system' ? 'cog' : 'headset');
+            const authorClass = senderType === 'support' ? 'support' : 'user';
+            messagesHtml += `
+              <div class="timeline-item">
+                <div class="timeline-marker ${authorClass}">
+                  <i class="fas fa-${icon}"></i>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="timeline-author ${authorClass}">
+                      <i class="fas fa-${icon} me-1"></i>${senderType === 'system' ? 'System' : (senderType === 'user' ? 'User' : 'Support')}
+                    </span>
+                    <span class="timeline-date">${msg.created_at ? new Date(msg.created_at).toLocaleString() : 'N/A'}</span>
+                  </div>
+                  <div class="timeline-message">${msg.body || ''}</div>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          messagesHtml = '<p style="color:var(--text-secondary);">No messages yet.</p>';
+        }
+
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3><i class="fas fa-reply me-2"></i>Reply — #${req.id}</h3>
+
+          <!-- Request Details Card -->
+          <div class="glass-card mb-3" style="padding:16px;border-left:4px solid var(--info);">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h5 style="margin:0;"><i class="fas fa-info-circle me-2"></i>Request Details</h5>
+              <span class="status-pill ${statusClass}">${statusLabel}</span>
+            </div>
+            <div class="row text-center mb-3">
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Type</div>
+                <div style="font-weight:600;"><i class="fas ${typeIcon} me-1"></i>${typeLabel}</div>
+              </div>
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Priority</div>
+                <div style="font-weight:600;"><i class="fas fa-flag me-1"></i>${req.priority || 'medium'}</div>
+              </div>
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Created</div>
+                <div style="font-weight:600;">${req.created_at ? new Date(req.created_at).toLocaleDateString() : 'N/A'}</div>
+              </div>
+            </div>
+            <div class="mb-2"><strong>Title:</strong> ${req.title || ''}</div>
+            <div class="mb-2"><strong>From:</strong> ${user?.fullName || 'N/A'} (${user?.email || 'N/A'})</div>
+            <div>
+              <strong>Description:</strong>
+              <p style="margin-top:6px;color:var(--text-secondary);padding:10px;background:rgba(0,0,0,0.1);border-radius:8px;">${req.description || ''}</p>
+            </div>
+          </div>
+
+          <!-- Reply Input -->
+          <div class="glass-card mb-3" style="padding:16px;">
+            <h5 style="margin-bottom:14px;"><i class="fas fa-pen me-2"></i>Your Reply</h5>
+            <textarea class="form-control" id="replyText" rows="4" placeholder="Write your reply here..."></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2">
+            <button class="btn btn-neon" style="flex:1;" onclick="RecLise.submitReply(${id})"><i class="fas fa-check me-2"></i>Reply & Update</button>
+            <button class="btn btn-outline-neon" style="flex:1;" onclick="RecLise.escalateToAdmin(${id})"><i class="fas fa-arrow-up me-1"></i>Escalate to Admin</button>
+          </div>
+        `;
+        showModal(content);
+      })
+      .catch(err => { showToast('Failed to load request', 'error'); console.error(err); });
+    }
+
+    // Submit Reply
+    function submitReply(id) {
+      const reply = document.getElementById('replyText')?.value.trim();
+      if (!reply) { showToast('Please write a reply first', 'error'); return; }
+
+      // First: Send reply
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=replyToRequest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + id + '&body=' + encodeURIComponent(reply)
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp.error) { showToast(resp.error, 'error'); return; }
+        // Second: Resolve the request
+        return fetch('/pfeeeee/PhtP/ajax/api.php?action=updateRequestStatus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'id=' + id + '&status=resolved'
+        });
+      })
+      .then(r => r.json())
+      .then(resp => {
+        showToast('Reply sent & request resolved', 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 500);
+      })
+      .catch(err => { showToast('Failed to send reply', 'error'); console.error(err); });
+    }
+
+    // Escalate to Admin
+    function escalateToAdmin(id) {
+      const reply = document.getElementById('replyText')?.value.trim();
+      const body = reply ? '&body=' + encodeURIComponent(reply) : '';
+
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=escalateRequest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + id + body
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp.error) { showToast(resp.error, 'error'); }
+        else {
+          showToast('Escalated to admin', 'success');
+          closeModal();
+          setTimeout(() => location.reload(), 500);
+        }
+      })
+      .catch(err => { showToast('Failed to escalate', 'error'); console.error(err); });
+    }
+
+    // View Resolved Request (rich version with timeline)
+    function viewResolvedRequestRich(id) {
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=getRequest&id=' + id)
+      .then(r => r.json())
+      .then(req => {
+        if (req.error) { showToast(req.error, 'error'); return; }
+
+        const user = req.requester_name ? { fullName: req.requester_name, email: req.requester_email } : null;
+        const statusClass = 'status-' + (req.status || 'resolved').replace('_', '-');
+        const statusLabel = 'Resolved';
+        const typeIcon = req.type === 'complaint' ? 'fa-exclamation-triangle' : 'fa-question-circle';
+        const typeLabel = req.type === 'complaint' ? 'Complaint' : 'Request';
+
+        // Build messages timeline
+        let messagesHtml = '';
+        if (req.messages && req.messages.length) {
+          req.messages.forEach(msg => {
+            const senderType = msg.sender_type || 'user';
+            const icon = senderType === 'user' ? 'user' : (senderType === 'system' ? 'cog' : 'headset');
+            const authorClass = senderType === 'support' ? 'support' : 'user';
+            messagesHtml += `
+              <div class="timeline-item">
+                <div class="timeline-marker ${authorClass}">
+                  <i class="fas fa-${icon}"></i>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="timeline-author ${authorClass}">
+                      <i class="fas fa-${icon} me-1"></i>${senderType === 'system' ? 'System' : (senderType === 'user' ? 'User' : 'Support')}
+                    </span>
+                    <span class="timeline-date">${msg.created_at ? new Date(msg.created_at).toLocaleString() : 'N/A'}</span>
+                  </div>
+                  <div class="timeline-message">${msg.body || ''}</div>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          messagesHtml = '<p style="color:var(--text-secondary);">No messages yet.</p>';
+        }
+
+        // Calculate response time
+        let responseTime = 'N/A';
+        if (req.created_at && req.updated_at) {
+          const start = new Date(req.created_at);
+          const end = new Date(req.updated_at);
+          const diffMs = end - start;
+          const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+          const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+          responseTime = diffHrs > 0 ? `${diffHrs}h ${diffMins}m` : `${diffMins}m`;
+        }
+
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3><i class="fas fa-eye me-2"></i>View Request — #${req.id}</h3>
+
+          <!-- Resolution Summary -->
+          <div class="glass-card mb-3" style="padding:16px;border-left:4px solid var(--success);">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h5 style="margin:0;color:var(--success);"><i class="fas fa-check-circle me-2"></i>Resolution Summary</h5>
+              <span class="status-pill ${statusClass}">${statusLabel}</span>
+            </div>
+            <div class="row text-center">
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Resolved On</div>
+                <div style="font-weight:600;">${req.updated_at ? new Date(req.updated_at).toLocaleDateString() : 'N/A'}</div>
+              </div>
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Total Messages</div>
+                <div style="font-weight:600;">${req.messages ? req.messages.length : 0}</div>
+              </div>
+              <div class="col-4">
+                <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:4px;">Response Time</div>
+                <div style="font-weight:600;">${responseTime}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Request Details -->
+          <div class="glass-card mb-3" style="padding:16px;">
+            <div class="row">
+              <div class="col-md-8">
+                <h5 style="margin-bottom:12px;"><i class="fas fa-info-circle me-2"></i>Request Details</h5>
+                <div class="mb-2"><strong>Type:</strong>
+                  <span class="badge ${req.type === 'complaint' ? 'bg-danger' : 'bg-warning'} me-2">
+                    <i class="fas ${typeIcon} me-1"></i>${typeLabel}
+                  </span>
+                  <span class="badge ${req.priority === 'high' ? 'bg-danger' : req.priority === 'medium' ? 'bg-warning' : 'bg-info'}">
+                    <i class="fas fa-flag me-1"></i>${req.priority || 'medium'}
+                  </span>
+                </div>
+                <div class="mb-2"><strong>From:</strong> ${user?.fullName || 'N/A'} (${user?.email || 'N/A'})</div>
+                <div class="mb-2"><strong>Created:</strong> ${req.created_at ? new Date(req.created_at).toLocaleString() : 'N/A'}</div>
+              </div>
+              <div class="col-md-4 text-center">
+                <div style="padding:20px;background:linear-gradient(135deg, var(--card-bg), rgba(var(--brand-accent-rgb),0.1));border-radius:12px;">
+                  <i class="fas ${req.type === 'technical' ? 'fa-cogs' : req.type === 'access' ? 'fa-key' : 'fa-graduation-cap'}" style="font-size:3rem;color:var(--neon-accent);margin-bottom:8px;"></i>
+                  <div style="font-size:0.9rem;font-weight:600;">${req.category || 'general'}</div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3">
+              <strong>Description:</strong>
+              <p style="margin-top:6px;color:var(--text-secondary);padding:12px;background:rgba(0,0,0,0.05);border-radius:8px;">${req.description || ''}</p>
+            </div>
+          </div>
+
+          <!-- Conversation Timeline -->
+          <div class="glass-card mb-3" style="padding:16px;">
+            <h5 style="margin-bottom:16px;"><i class="fas fa-comments me-2"></i>Conversation Timeline</h5>
+            <div class="timeline">
+              ${messagesHtml}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-neon" onclick="RecLise.closeModal()">Close</button>
+          </div>
+        `;
+        showModal(content, true);
+      })
+      .catch(err => { showToast('Failed to load request', 'error'); console.error(err); });
+    }
+
+    // Show Resolve Escalated Modal (rich version)
+    function showResolveEscalatedModal(id) {
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=getRequest&id=' + id)
+      .then(r => r.json())
+      .then(req => {
+        if (req.error) { showToast(req.error, 'error'); return; }
+
+        const content = `
+          <button class="modal-close" onclick="RecLise.closeModal()"><i class="fas fa-times"></i></button>
+          <h3><i class="fas fa-check-circle me-2"></i>Resolve — #${req.id}</h3>
+
+          <!-- Request Summary -->
+          <div class="glass-card mb-3" style="padding:16px;border-left:4px solid var(--warning);">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <h5 style="margin:0;"><i class="fas fa-info-circle me-2"></i>${req.title || ''}</h5>
+              <span class="status-pill status-escalated">Escalated</span>
+            </div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);">
+              <span>Type: <i class="fas ${req.type === 'complaint' ? 'fa-exclamation-triangle' : 'fa-question-circle'} me-1"></i>${req.type === 'complaint' ? 'Complaint' : 'Request'}</span>
+              <span class="mx-2">|</span>
+              <span>Priority: <i class="fas fa-flag me-1"></i>${req.priority || 'medium'}</span>
+            </div>
+          </div>
+
+          <!-- Resolution Form -->
+          <div class="glass-card mb-3" style="padding:16px;">
+            <h5 style="margin-bottom:14px;"><i class="fas fa-clipboard-check me-2"></i>Final Response</h5>
+            <div class="mb-3">
+              <label class="form-label">Closure Motive</label>
+              <select class="form-select" id="closeMotive">
+                <option value="Resolved">Resolved</option>
+                <option value="Duplicate">Duplicate</option>
+                <option value="Cannot Reproduce">Cannot Reproduce</option>
+                <option value="Out of Scope">Out of Scope</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Final Response</label>
+              <textarea class="form-control" id="closeResponse" rows="3" placeholder="Write your final response..."></textarea>
+            </div>
+          </div>
+
+          <button class="btn btn-neon w-100" onclick="RecLise.resolveEscalatedSubmit(${id})"><i class="fas fa-check me-2"></i>Resolve Request</button>
+        `;
+        showModal(content);
+      })
+      .catch(err => { showToast('Failed to load request', 'error'); });
+    }
+
+    // Submit Escalated Resolution
+    function resolveEscalatedSubmit(id) {
+      const motive = document.getElementById('closeMotive')?.value || 'Resolved';
+      const response = document.getElementById('closeResponse')?.value.trim() || '';
+
+      fetch('/pfeeeee/PhtP/ajax/api.php?action=updateRequestStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + id + '&status=resolved&response=' + encodeURIComponent(response + ' (Motive: ' + motive + ')')
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp.error) { showToast(resp.error, 'error'); }
+        else {
+          showToast('Request resolved', 'success');
+          closeModal();
+          setTimeout(() => location.reload(), 500);
+        }
+      })
+      .catch(err => { showToast('Failed to resolve', 'error'); console.error(err); });
+    }
+
+  // Render Content (history/audit log tabs)
+  function renderContent(tab) {
+    fetch('/pfeeeee/PhtP/ajax/api.php?action=getContent&tab=' + tab)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById(tab + 'Content').innerHTML = data.html;
+    });
+  }
+
+  return {
+    toggleTheme,
+    toggleLangMenu,
+    setLanguage,
+    toggleSidebar,
+    showToast,
+    closeModal,
+    filterUsers,
+    filterByStatus,
+    scrollToReply,
+    sendUserMessage,
+    submitNewRequest,
+    submitSupportRequest: submitNewRequest,
+    showReplyModal: viewRequestDetail,
+      viewRequestDetail,
+    showAddUserModal,
+    addUser,
+    showEditUserModal,
+    editUser,
+    deleteUser,
+    handleLogout,
+    showAddTrainingModal,
+    addTraining,
+    editTraining,
+    deleteTraining,
+    registerForTraining,
+    viewRegistrations,
+    showAddGuideModal,
+    addGuide,
+    editGuide,
+    saveEditGuide,
+    deleteGuide,
+    showAddCorrespondenceModal,
+    addCorrespondence,
+    deleteCorrespondence,
+    showAddBoxModal,
+    addBox,
+    deleteBox,
+    showAddIssueModal,
+    addIssue,
+    resolveIssue,
+    deleteIssue,
+    addRef,
+    removeRef,
+    saveCommonCustomization,
+    saveWorkflowCustomization,
+    saveDashboardCustomization,
+    showResetPasswordModal,
+    resetPassword,
+    approveRegistration,
+    rejectRegistration,
+    renderContent,
+    saveEditSession,
+    showDelegateModal,
+    delegateRole,
+    viewAssistGuide,
+    deleteTrainingConfirm: deleteTraining,
+    processRequest,
+    saveCorrespondenceReassign,
+    saveCorrespondenceTemplate,
+    showResolveEscalatedModal,
+    viewResolvedRequest: viewRequestDetail,
+    showReplyModal: viewRequestDetail,
+
+    // Rich modal functions matching support_reclise.html style
+    submitReply,
+    escalateToAdmin,
+    viewResolvedRequestRich
+  };
+})();

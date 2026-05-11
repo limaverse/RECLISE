@@ -3,11 +3,11 @@ $currentView = 'history';
 require_once '../includes/header.php';
 
 // Fetch resolved/closed requests
-$history = to_camel_all($pdo->query("SELECT r.*, u.full_name AS requester_name 
+$history = to_camel_all($pdo->query("SELECT r.*, u.full_name AS requesterName 
     FROM requests r 
     LEFT JOIN users u ON r.user_id = u.id 
     WHERE r.status = 'resolved' OR r.status = 'closed' 
-    ORDER BY r.updated_at DESC")->fetchAll());
+    ORDER BY r.created_at DESC")->fetchAll());
 ?>
 
 <div class="section-header">
@@ -18,7 +18,7 @@ $history = to_camel_all($pdo->query("SELECT r.*, u.full_name AS requester_name
 </div>
 
 <?php if (empty($history)): ?>
-  <p class="text-secondary text-center padding:40px;"><?php echo t('noResults'); ?></p>
+  <p class="text-secondary text-center p-4"><?php echo t('noResults'); ?></p>
 <?php else: ?>
   <div class="glass-card" style="padding:20px;">
     <table class="table-glass">
@@ -36,12 +36,12 @@ $history = to_camel_all($pdo->query("SELECT r.*, u.full_name AS requester_name
         <?php foreach ($history as $req): ?>
           <tr>
             <td>#<?= $req['id'] ?></td>
-            <td><?= htmlspecialchars($req['requester_name'] ?? 'N/A') ?></td>
+            <td><?= htmlspecialchars($req['requesterName'] ?? 'N/A') ?></td>
             <td><?= htmlspecialchars($req['title']) ?></td>
             <td><span class="status-pill status-<?= $req['status'] ?>"><?php echo t('status' . ucfirst($req['status'])); ?></span></td>
-            <td><?= date('Y-m-d', strtotime($req['updated_at'])) ?></td>
+            <td><?= ($req['updatedAt'] ?? null) ? date('Y-m-d', strtotime($req['updatedAt'])) : 'N/A' ?></td>
             <td>
-              <button class="btn btn-outline-neon btn-sm" onclick="RecLise.viewResolvedRequest(<?= $req['id'] ?>)">
+              <button class="btn btn-outline-neon btn-sm" onclick="RecLise.viewRequestDetail(<?= $req['id'] ?>)">
                 <i class="fas fa-eye me-1"></i><?php echo t('view'); ?>
               </button>
             </td>

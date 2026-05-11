@@ -10,7 +10,6 @@ class Auth {
         return isset($_SESSION['user_id']);
     }
 
-
     public static function user() {
         self::start();
         if (!self::check()) return null;
@@ -36,10 +35,8 @@ class Auth {
     }
 
     public static function getBaseUrl() {
-        $script = $_SERVER['SCRIPT_NAME']; // e.g. /pfeeeee/PhtP/admin/dashboard.php
+        $script = $_SERVER['SCRIPT_NAME'];
         $path = explode('/', $script);
-        // We know login.php is at the root of the project.
-        // We can search for the project folder name, but let's just assume PhtP is the root.
         $rootIndex = array_search('PhtP', $path);
         if ($rootIndex !== false) {
             return implode('/', array_slice($path, 0, $rootIndex + 1)) . '/';

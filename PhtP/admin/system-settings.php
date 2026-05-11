@@ -36,10 +36,30 @@ $settings = $pdo->query("SELECT setting_key, setting_value FROM system_settings"
   </div>
 
   <div class="col-12">
-    <button class="btn btn-neon" onclick="RecLise.showToast('<?php echo t('settingsSaved'); ?>', 'success')">
+    <button class="btn btn-neon" onclick="saveSystemSettings()">
       <i class="fas fa-save me-2"></i><?php echo t('save'); ?>
     </button>
   </div>
 </div>
 
+<script>
+window.saveSystemSettings = function() {
+    fetch('/pfeeeee/PhtP/ajax/api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'saveCommonCustomization',
+            email_notif: document.getElementById('settEmailNotif').checked ? 1 : 0,
+            timeout: document.getElementById('settTimeout').value
+        })
+    })
+    .then(r => r.json())
+    .then(function(data) {
+        if (data.success) { alert('System settings saved!'); } else { alert(data.message || 'Error'); }
+    })
+    .catch(function() { alert('Error'); });
+};
+</script>
+
 <?php require_once '../includes/footer.php'; ?>
+
